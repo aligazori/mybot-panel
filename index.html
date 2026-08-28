@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل مدیریت گروه</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+            padding: 20px;
+        }
+        .header { text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; color: white; }
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .card {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 0;
+            border-bottom: 1px solid var(--tg-theme-hint-color, #ddd);
+        }
+        .setting-item:last-child { border-bottom: none; }
+        .setting-label { font-size: 16px; font-weight: 500; }
+        .toggle {
+            position: relative;
+            width: 55px;
+            height: 30px;
+            background: #ccc;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .toggle.active { background: #4CAF50; }
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: white;
+            top: 2px;
+            right: 2px;
+            transition: 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .toggle.active::after { right: 27px; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 8px;
+        }
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s;
+        }
+        .btn:active { transform: scale(0.98); }
+        .emoji { margin-left: 8px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚙️ پنل مدیریت گروه</h1>
+        <p>کنترل کامل گروه شما</p>
+    </div>
+    
+    <div class="card">
+        <h3 style="margin-bottom: 15px;">🔧 تنظیمات امنیتی</h3>
+        <div class="setting-item">
+            <span class="setting-label"><span class="emoji">🔗</span>ضد لینک</span>
+            <div class="toggle active" data-setting="anti_link" onclick="toggleSetting(this)"></div>
+        </div>
+        <div class="setting-item">
+            <span class="setting-label"><span class="emoji">🔄</span>ضد فوروارد</span>
+            <div class="toggle active" data-setting="anti_forward" onclick="toggleSetting(this)"></div>
+        </div>
+        <div class="setting-item">
+            <span class="setting-label"><span class="emoji">🤖</span>کپچا ورود</span>
+            <div class="toggle active" data-setting="captcha_enabled" onclick="toggleSetting(this)"></div>
+        </div>
+        <div class="setting-item">
+            <span class="setting-label"><span class="emoji">🚫</span>ضد اسپم</span>
+            <div class="toggle active" data-setting="anti_spam" onclick="toggleSetting(this)"></div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h3 style="margin-bottom: 15px;"> آمار گروه</h3>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value" id="total-users">۰</div>
+                <div class="stat-label">کل کاربران</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="banned-users">۰</div>
+                <div class="stat-label">بن شده</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="actions-today"></div>
+                <div class="stat-label">اقدامات امروز</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="chat-id">-</div>
+                <div class="stat-label">آیدی چت</div>
+            </div>
+        </div>
+    </div>
+    
+    <button class="btn" onclick="saveSettings()">💾 ذخیره تغییرات</button>
+    
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        let settings = {
+            anti_link: true,
+            anti_forward: true,
+            captcha_enabled: true,
+            anti_spam: true
+        };
+        
+        function toggleSetting(element) {
+            const setting = element.dataset.setting;
+            element.classList.toggle('active');
+            settings[setting] = element.classList.contains('active');
+        }
+        
+        function saveSettings() {
+            tg.sendData(JSON.stringify(settings));
+            tg.showPopup({
+                title: '✅ موفقیت!',
+                message: 'تنظیمات با موفقیت ذخیره شد',
+                buttons: [{type: 'ok'}]
+            });
+            setTimeout(() => tg.close(), 1500);
+        }
+        
+        // دریافت داده از URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const dataEncoded = urlParams.get('data');
+        
+        if (dataEncoded) {
+            try {
+                const data = JSON.parse(atob(dataEncoded));
+                settings = data.settings;
+                
+                document.querySelectorAll('.toggle').forEach(toggle => {
+                    const setting = toggle.dataset.setting;
+                    if (settings[setting]) {
+                        toggle.classList.add('active');
+                    } else {
+                        toggle.classList.remove('active');
+                    }
+                });
+                
+                // نمایش آمار
+                if (data.stats) {
+                    document.getElementById('total-users').textContent = data.stats.total_users || 0;
+                    document.getElementById('banned-users').textContent = data.stats.banned_users || 0;
+                    document.getElementById('actions-today').textContent = data.stats.actions_today || 0;
+                }
+                
+                if (data.chat_id) {
+                    document.getElementById('chat-id').textContent = data.chat_id;
+                }
+            } catch (e) {
+                console.error('Error parsing data:', e);
+            }
+        }
+        
+        tg.ready();
+    </script>
+</body>
+</html>
