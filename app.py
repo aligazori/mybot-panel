@@ -17,7 +17,7 @@ from flask_cors import CORS
 # ══════════════════════════════════════════════
 #  تنظیمات - این بخش را ویرایش کنید
 # ══════════════════════════════════════════════
-BOT_TOKEN = "366695127:4HASIDEMnkKe49XmlBZQO4qQbnHFwxG0caI"  # ← توکن ربات خود را اینجا بگذارید
+BOT_TOKEN = "366695127:h8xj58vhhyjNTJaJrxd2rA3cUJgYlLA4KK4"  # ← توکن ربات خود را اینجا بگذارید
 BASE_URL = f"https://tapi.bale.ai/bot{BOT_TOKEN}"
 OWNER_IDS = [96221498]  # ← آیدی عددی خودتان
 POLL_INTERVAL = 1
