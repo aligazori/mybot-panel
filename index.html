@@ -996,10 +996,12 @@
         function saveAdvancedSettings() {
             const bannedWords = document.getElementById('banned-words').value;
             const welcomeMessage = document.getElementById('welcome-message').value;
-            
+
             tg.sendData(JSON.stringify({
-                type: 'save_advanced_settings',
-                banned_words: bannedWords.split(',').map(w => w.trim()),
+                type: 'save_settings',
+                chat_id: chatData.chat_id,
+                settings: settings,
+                banned_words: bannedWords.split(',').map(w => w.trim()).filter(w => w.length > 0),
                 welcome_message: welcomeMessage
             }));
             showToast('تنظیمات ذخیره شد');
@@ -1014,6 +1016,7 @@
             
             tg.sendData(JSON.stringify({
                 type: 'broadcast',
+                chat_id: chatData.chat_id,
                 message: message
             }));
             showToast('پیام ارسال شد');
@@ -1031,6 +1034,7 @@
             
             tg.sendData(JSON.stringify({
                 type: 'schedule_message',
+                chat_id: chatData.chat_id,
                 message: message,
                 time: time
             }));
