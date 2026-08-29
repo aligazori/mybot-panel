@@ -362,6 +362,102 @@
             box-shadow: 0 8px 24px rgba(41, 72, 100, 0.4);
         }
 
+        .message-log-item {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+        }
+
+        .message-log-item.deleted {
+            background: rgba(255, 70, 70, 0.08);
+            border-color: rgba(255, 70, 70, 0.25);
+        }
+
+        .message-log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .message-log-sender {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .message-log-time {
+            font-size: 12px;
+            opacity: 0.55;
+        }
+
+        .message-log-text {
+            font-size: 14px;
+            opacity: 0.9;
+            word-break: break-word;
+        }
+
+        .message-log-item.deleted .message-log-text {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .message-log-deleted-badge {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #ff6b6b;
+        }
+
+        .user-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+        }
+
+        .user-list-item.banned {
+            background: rgba(255, 70, 70, 0.08);
+            border-color: rgba(255, 70, 70, 0.25);
+        }
+
+        .user-list-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .user-list-meta {
+            font-size: 12px;
+            opacity: 0.55;
+        }
+
+        .user-list-badge {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 100px;
+            white-space: nowrap;
+        }
+
+        .user-list-badge.warn {
+            background: rgba(255, 190, 70, 0.15);
+            color: #ffbe46;
+        }
+
+        .user-list-badge.banned {
+            background: rgba(255, 70, 70, 0.15);
+            color: #ff6b6b;
+        }
+
+        .user-list-badge.ok {
+            background: rgba(80, 200, 130, 0.15);
+            color: #50c882;
+        }
+
         .stat-icon-wrapper {
             width: 48px;
             height: 48px;
@@ -777,7 +873,7 @@
                         <div class="stat-label">اقدامات امروز</div>
                     </div>
                     
-                    <div class="stat-card">
+                    <div class="stat-card" onclick="openTodayMessages()" style="cursor: pointer;">
                         <div class="stat-icon-wrapper">
                             <i class="fas fa-comment-dots"></i>
                         </div>
@@ -861,6 +957,45 @@
                     </div>
                     <div class="toggle-switch active" data-setting="anti_spam" onclick="toggleSetting(this)"></div>
                 </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-icon-box">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="setting-text">
+                            <div class="setting-name">ضد فلود</div>
+                            <div class="setting-desc">میوت خودکار پیام‌های پشت‌سرهم زیاد</div>
+                        </div>
+                    </div>
+                    <div class="toggle-switch active" data-setting="anti_flood" onclick="toggleSetting(this)"></div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-icon-box">
+                            <i class="fas fa-photo-video"></i>
+                        </div>
+                        <div class="setting-text">
+                            <div class="setting-name">محدودیت رسانه عضو جدید</div>
+                            <div class="setting-desc">اعضای تازه‌وارد نمی‌توانند عکس/ویدیو بفرستند</div>
+                        </div>
+                    </div>
+                    <div class="toggle-switch active" data-setting="restrict_new_media" onclick="toggleSetting(this)"></div>
+                </div>
+            </div>
+
+            <div class="glass-panel">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-scroll"></i>
+                    </div>
+                    <div class="section-title">قوانین گروه</div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">متنی که با دستور /rules برای اعضا نمایش داده می‌شود</label>
+                    <textarea class="input-field" id="rules-text" placeholder="مثلاً: ۱- احترام به اعضا الزامی است..."></textarea>
+                </div>
             </div>
 
             <div class="glass-panel">
@@ -893,30 +1028,42 @@
             <div class="glass-panel">
                 <div class="section-header">
                     <div class="section-icon">
-                        <i class="fas fa-user-shield"></i>
+                        <i class="fas fa-search"></i>
                     </div>
-                    <div class="section-title">کاربران بن شده</div>
+                    <div class="section-title">جستجوی کاربر</div>
                 </div>
-                <div id="banned-users-list">
-                    <!-- Users will be loaded here -->
+                <div class="input-group">
+                    <input type="text" class="input-field" id="user-search" placeholder="نام کاربر..." oninput="renderUsersList()">
                 </div>
             </div>
 
             <div class="glass-panel">
                 <div class="section-header">
                     <div class="section-icon">
-                        <i class="fas fa-search"></i>
+                        <i class="fas fa-user-shield"></i>
                     </div>
-                    <div class="section-title">جستجوی کاربر</div>
+                    <div class="section-title">کاربران گروه</div>
                 </div>
-                <div class="input-group">
-                    <input type="text" class="input-field" id="user-search" placeholder="نام یا آیدی کاربر...">
+                <div id="users-list">
+                    <p style="opacity: 0.6; text-align: center; padding: 20px;">در حال بارگذاری...</p>
                 </div>
             </div>
         </div>
 
         <!-- Messages Tab -->
         <div id="messages" class="tab-content">
+            <div class="glass-panel">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <div class="section-title">پیام‌های امروز</div>
+                </div>
+                <div id="message-log-list">
+                    <p style="opacity: 0.6; text-align: center; padding: 20px;">برای دیدن پیام‌ها روی کارت «پیام‌های امروز» در داشبورد بزن.</p>
+                </div>
+            </div>
+
             <div class="glass-panel">
                 <div class="section-header">
                     <div class="section-icon">
@@ -969,7 +1116,9 @@
             anti_link: true,
             anti_forward: true,
             captcha_enabled: true,
-            anti_spam: true
+            anti_spam: true,
+            anti_flood: true,
+            restrict_new_media: true
         };
 
         let chatData = {};
@@ -986,6 +1135,74 @@
             event.currentTarget.classList.add('active');
         }
 
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+
+        function openTodayMessages() {
+            // فعال کردن دستی تب "پیام‌ها" بدون نیاز به event.currentTarget
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            document.getElementById('messages').classList.add('active');
+            document.querySelectorAll('.nav-item')[3].classList.add('active'); // چهارمین آیتم = «پیام‌ها»
+
+            const container = document.getElementById('message-log-list');
+            const items = (chatData && chatData.today_messages) || [];
+
+            if (items.length === 0) {
+                container.innerHTML = '<p style="opacity: 0.6; text-align: center; padding: 20px;">هنوز پیامی امروز ثبت نشده.</p>';
+                return;
+            }
+
+            container.innerHTML = items.map(m => `
+                <div class="message-log-item ${m.deleted ? 'deleted' : ''}">
+                    <div class="message-log-header">
+                        <span class="message-log-sender">${escapeHtml(m.name)}</span>
+                        <span class="message-log-time">${escapeHtml(m.time)}</span>
+                    </div>
+                    <div class="message-log-text">${escapeHtml(m.text)}</div>
+                    ${m.deleted ? `<div class="message-log-deleted-badge">🗑 حذف شد${m.reason ? ' — ' + escapeHtml(m.reason) : ''}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function renderUsersList() {
+            const container = document.getElementById('users-list');
+            const query = (document.getElementById('user-search').value || '').trim().toLowerCase();
+            const items = (chatData && chatData.users_list) || [];
+
+            const filtered = query
+                ? items.filter(u => (u.name || '').toLowerCase().includes(query) || (u.username || '').toLowerCase().includes(query))
+                : items;
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<p style="opacity: 0.6; text-align: center; padding: 20px;">کاربری پیدا نشد.</p>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(u => {
+                let badge;
+                if (u.banned) {
+                    badge = '<span class="user-list-badge banned">⛔️ بن‌شده</span>';
+                } else if (u.warnings > 0) {
+                    badge = `<span class="user-list-badge warn">⚠️ ${u.warnings}/3</span>`;
+                } else {
+                    badge = '<span class="user-list-badge ok">✅ عادی</span>';
+                }
+                return `
+                    <div class="user-list-item ${u.banned ? 'banned' : ''}">
+                        <div>
+                            <div class="user-list-name">${escapeHtml(u.name)}</div>
+                            <div class="user-list-meta">${u.username ? '@' + escapeHtml(u.username) + ' • ' : ''}عضو از ${escapeHtml(u.joined || '-')}</div>
+                        </div>
+                        ${badge}
+                    </div>
+                `;
+            }).join('');
+        }
+
         function toggleSetting(element) {
             const setting = element.dataset.setting;
             element.classList.toggle('active');
@@ -996,13 +1213,15 @@
         function saveAdvancedSettings() {
             const bannedWords = document.getElementById('banned-words').value;
             const welcomeMessage = document.getElementById('welcome-message').value;
+            const rulesText = document.getElementById('rules-text').value;
 
             tg.sendData(JSON.stringify({
                 type: 'save_settings',
                 chat_id: chatData.chat_id,
                 settings: settings,
                 banned_words: bannedWords.split(',').map(w => w.trim()).filter(w => w.length > 0),
-                welcome_message: welcomeMessage
+                welcome_message: welcomeMessage,
+                rules_text: rulesText
             }));
             showToast('تنظیمات ذخیره شد');
         }
@@ -1050,20 +1269,23 @@
             }, 3000);
         }
 
+        const WEEKDAY_FA = {Sat: 'ش', Sun: 'ی', Mon: 'د', Tue: 'س', Wed: 'چ', Thu: 'پ', Fri: 'ج'};
+
         function drawChart() {
             const canvas = document.getElementById('activityChart');
             const ctx = canvas.getContext('2d');
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
-            
-            const data = [30, 45, 25, 60, 40, 55, 35];
-            const labels = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
-            
+
+            const weekly = (chatData && chatData.weekly_stats) || [];
+            const data = weekly.length ? weekly.map(d => d.count) : [0, 0, 0, 0, 0, 0, 0];
+            const labels = weekly.length ? weekly.map(d => WEEKDAY_FA[d.label] || d.label) : ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+
             const barWidth = canvas.width / data.length - 20;
-            const maxVal = Math.max(...data);
-            
+            const maxVal = Math.max(...data, 1);
+
             data.forEach((val, i) => {
                 const barHeight = (val / maxVal) * (canvas.height - 40);
                 const x = i * (canvas.width / data.length) + 10;
@@ -1109,7 +1331,12 @@
                     document.getElementById('actions-today').textContent = data.stats.actions_today || 0;
                     document.getElementById('messages-today').textContent = data.stats.messages_today || 0;
                 }
-                
+
+                document.getElementById('banned-words').value = data.banned_words || '';
+                document.getElementById('welcome-message').value = data.welcome_message || '';
+                document.getElementById('rules-text').value = data.rules_text || '';
+
+                renderUsersList();
                 setTimeout(drawChart, 500);
                 
             } catch (e) {
