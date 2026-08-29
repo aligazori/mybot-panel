@@ -2,1109 +2,588 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>پنل مدیریت</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت گروه بله</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
 
         :root {
-            --primary-dark: #294864;
-            --primary-light: #D9E4DE;
-            --accent-blue: #A2C3D4;
-            --accent-purple: #904F91;
-            --glass-bg: rgba(217, 228, 222, 0.08);
-            --glass-border: rgba(217, 228, 222, 0.15);
-            --glass-highlight: rgba(255, 255, 255, 0.1);
-            --text-primary: #D9E4DE;
-            --text-secondary: rgba(217, 228, 222, 0.6);
-            --shadow: 0 8px 32px rgba(41, 72, 100, 0.4);
+            --primary: #2AABEE;
+            --primary-dark: #229ED9;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --danger: #F44336;
+            --bg: #17212B;
+            --bg-secondary: #232E3C;
+            --bg-tertiary: #2B5278;
+            --text: #FFFFFF;
+            --text-secondary: #7D8B99;
+            --border: #3B4B5C;
         }
 
         body {
-            font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--primary-dark);
-            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
+            padding: 0;
         }
 
-        /* Liquid Glass Background */
-        .bg-layer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .bg-gradient {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(ellipse at 20% 50%, rgba(144, 79, 145, 0.3) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 20%, rgba(162, 195, 212, 0.25) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 80%, rgba(41, 72, 100, 0.4) 0%, transparent 50%);
-            animation: gradientMove 20s ease-in-out infinite;
-        }
-
-        @keyframes gradientMove {
-            0%, 100% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.1) rotate(5deg); }
-        }
-
-        .glass-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.4;
-            animation: orbFloat 25s infinite ease-in-out;
-        }
-
-        .orb-1 {
-            width: 500px;
-            height: 500px;
-            background: var(--accent-purple);
-            top: -150px;
-            right: -150px;
-            animation-delay: 0s;
-        }
-
-        .orb-2 {
-            width: 400px;
-            height: 400px;
-            background: var(--accent-blue);
-            bottom: -100px;
-            left: -100px;
-            animation-delay: -8s;
-        }
-
-        .orb-3 {
-            width: 350px;
-            height: 350px;
-            background: var(--primary-light);
-            top: 50%;
-            left: 50%;
-            opacity: 0.2;
-            animation-delay: -16s;
-        }
-
-        @keyframes orbFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(50px, -80px) scale(1.15); }
-            66% { transform: translate(-40px, 40px) scale(0.85); }
-        }
-
-        /* Main Container */
-        .container {
-            position: relative;
-            z-index: 1;
-            padding: 24px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* Liquid Glass Card - REAL Glass Effect */
-        .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(40px) saturate(180%);
-            -webkit-backdrop-filter: blur(40px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 28px;
-            margin-bottom: 20px;
-            box-shadow: 
-                var(--shadow),
-                inset 0 1px 0 var(--glass-highlight),
-                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .glass-panel::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, 
-                transparent, 
-                rgba(255, 255, 255, 0.3), 
-                transparent);
-        }
-
-        .glass-panel::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(
-                circle at center,
-                rgba(255, 255, 255, 0.05) 0%,
-                transparent 70%
-            );
-            opacity: 0;
-            transition: opacity 0.4s;
-            pointer-events: none;
-        }
-
-        .glass-panel:hover::after {
-            opacity: 1;
-        }
-
-        .glass-panel:hover {
-            transform: translateY(-2px);
-            box-shadow: 
-                0 12px 40px rgba(41, 72, 100, 0.5),
-                inset 0 1px 0 var(--glass-highlight);
-        }
-
-        /* Header */
         .header {
+            background: var(--bg-secondary);
+            padding: 20px;
             text-align: center;
-            margin-bottom: 32px;
-            padding: 40px 20px;
-        }
-
-        .header-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            box-shadow: 
-                0 10px 30px rgba(144, 79, 145, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header-icon::before {
-            content: '';
-            position: absolute;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
             top: 0;
-            left: 0;
-            right: 0;
-            height: 50%;
-            background: linear-gradient(180deg, rgba(255,255,255,0.3), transparent);
+            z-index: 100;
         }
 
         .header h1 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-blue) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 20px;
+            color: var(--primary);
+            margin-bottom: 5px;
         }
 
         .header p {
+            font-size: 13px;
             color: var(--text-secondary);
-            font-size: 15px;
-            font-weight: 400;
         }
 
-        /* Navigation */
-        .nav-container {
+        .tabs {
             display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
+            background: var(--bg-secondary);
             overflow-x: auto;
-            padding: 4px;
-            scrollbar-width: none;
+            border-bottom: 1px solid var(--border);
         }
 
-        .nav-container::-webkit-scrollbar {
-            display: none;
-        }
-
-        .nav-item {
-            flex: 0 0 auto;
-            padding: 14px 24px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            color: var(--text-secondary);
+        .tab {
+            flex: 1;
+            padding: 15px 10px;
+            text-align: center;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 14px;
-            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
             white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            position: relative;
-            overflow: hidden;
+            font-size: 14px;
         }
 
-        .nav-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        .tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
         }
 
-        .nav-item.active {
-            background: rgba(162, 195, 212, 0.15);
-            color: var(--primary-light);
-            border-color: rgba(162, 195, 212, 0.3);
-            box-shadow: 0 4px 20px rgba(162, 195, 212, 0.2);
+        .tab:hover {
+            background: var(--bg-tertiary);
         }
 
-        .nav-item:hover {
-            background: rgba(162, 195, 212, 0.1);
-            transform: translateY(-1px);
+        .content {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
-        .nav-item i {
-            font-size: 16px;
-        }
-
-        /* Tab Content */
-        .tab-content {
+        .section {
             display: none;
-            animation: fadeIn 0.4s ease-out;
         }
 
-        .tab-content.active {
+        .section.active {
             display: block;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Section Title */
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .section-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+        .card {
+            background: var(--bg-secondary);
             border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--primary);
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            box-shadow: 0 4px 12px rgba(144, 79, 145, 0.3);
+            gap: 10px;
         }
 
-        .section-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--primary-light);
-        }
-
-        /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
         .stat-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 24px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
             text-align: center;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(41, 72, 100, 0.4);
-        }
-
-        .message-log-item {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 14px;
-            padding: 12px 16px;
-            margin-bottom: 10px;
-        }
-
-        .message-log-item.deleted {
-            background: rgba(255, 70, 70, 0.08);
-            border-color: rgba(255, 70, 70, 0.25);
-        }
-
-        .message-log-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-        }
-
-        .message-log-sender {
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .message-log-time {
-            font-size: 12px;
-            opacity: 0.55;
-        }
-
-        .message-log-text {
-            font-size: 14px;
-            opacity: 0.9;
-            word-break: break-word;
-        }
-
-        .message-log-item.deleted .message-log-text {
-            text-decoration: line-through;
-            opacity: 0.6;
-        }
-
-        .message-log-deleted-badge {
-            margin-top: 8px;
-            font-size: 12px;
-            color: #ff6b6b;
-        }
-
-        .user-list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 14px;
-            padding: 12px 16px;
-            margin-bottom: 10px;
-        }
-
-        .user-list-item.banned {
-            background: rgba(255, 70, 70, 0.08);
-            border-color: rgba(255, 70, 70, 0.25);
-        }
-
-        .user-list-name {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 2px;
-        }
-
-        .user-list-meta {
-            font-size: 12px;
-            opacity: 0.55;
-        }
-
-        .user-list-badge {
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 100px;
-            white-space: nowrap;
-        }
-
-        .user-list-badge.warn {
-            background: rgba(255, 190, 70, 0.15);
-            color: #ffbe46;
-        }
-
-        .user-list-badge.banned {
-            background: rgba(255, 70, 70, 0.15);
-            color: #ff6b6b;
-        }
-
-        .user-list-badge.ok {
-            background: rgba(80, 200, 130, 0.15);
-            color: #50c882;
-        }
-
-        .stat-icon-wrapper {
-            width: 48px;
-            height: 48px;
-            margin: 0 auto 16px;
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            box-shadow: 0 4px 12px rgba(144, 79, 145, 0.3);
+            border: 1px solid var(--border);
         }
 
         .stat-value {
             font-size: 32px;
-            font-weight: 700;
-            color: var(--primary-light);
-            margin-bottom: 8px;
-            letter-spacing: -1px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 5px;
         }
 
         .stat-label {
             font-size: 13px;
             color: var(--text-secondary);
-            font-weight: 400;
         }
 
-        /* Settings List */
-        .setting-row {
+        .switch-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 0;
-            border-bottom: 1px solid var(--glass-border);
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .setting-row:last-child {
+        .switch-item:last-child {
             border-bottom: none;
         }
 
-        .setting-info {
+        .switch-label {
             display: flex;
             align-items: center;
-            gap: 16px;
-        }
-
-        .setting-icon-box {
-            width: 44px;
-            height: 44px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            color: var(--accent-blue);
-            transition: all 0.3s;
-        }
-
-        .setting-row:hover .setting-icon-box {
-            background: rgba(162, 195, 212, 0.15);
-            transform: scale(1.05);
-        }
-
-        .setting-text {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .setting-name {
-            font-size: 15px;
-            font-weight: 500;
-            color: var(--primary-light);
-        }
-
-        .setting-desc {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        /* Toggle Switch */
-        .toggle-switch {
-            position: relative;
-            width: 56px;
-            height: 30px;
-            background: rgba(41, 72, 100, 0.5);
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid var(--glass-border);
-        }
-
-        .toggle-switch.active {
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
-            box-shadow: 0 4px 16px rgba(144, 79, 145, 0.4);
-        }
-
-        .toggle-switch::after {
-            content: '';
-            position: absolute;
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 50%;
-            top: 2px;
-            right: 2px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .toggle-switch.active::after {
-            right: 28px;
-        }
-
-        /* Input Fields */
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-label {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 14px;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .input-field {
-            width: 100%;
-            padding: 16px 18px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 14px;
-            color: var(--primary-light);
-            font-size: 15px;
-            font-family: 'Vazirmatn', sans-serif;
-            transition: all 0.3s;
-            outline: none;
-        }
-
-        .input-field:focus {
-            background: rgba(162, 195, 212, 0.1);
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 3px rgba(162, 195, 212, 0.15);
-        }
-
-        .input-field::placeholder {
-            color: var(--text-secondary);
-        }
-
-        textarea.input-field {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        /* Buttons */
-        .btn {
-            width: 100%;
-            padding: 18px;
-            border: none;
-            border-radius: 16px;
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            font-family: 'Vazirmatn', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 8px 24px rgba(144, 79, 145, 0.4);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             gap: 10px;
+            font-size: 15px;
         }
 
-        .btn::before {
-            content: '';
+        .switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
             position: absolute;
+            cursor: pointer;
             top: 0;
             left: 0;
             right: 0;
-            height: 50%;
-            background: linear-gradient(180deg, rgba(255,255,255,0.2), transparent);
+            bottom: 0;
+            background-color: var(--border);
+            transition: 0.3s;
+            border-radius: 26px;
         }
 
-        .btn:active {
-            transform: scale(0.98);
-            box-shadow: 0 4px 16px rgba(144, 79, 145, 0.3);
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
         }
 
-        .btn-secondary {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            box-shadow: none;
-            color: var(--primary-light);
+        input:checked + .slider {
+            background-color: var(--success);
         }
 
-        .btn-secondary::before {
-            display: none;
+        input:checked + .slider:before {
+            transform: translateX(24px);
         }
 
-        /* User List */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
         .user-item {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            padding: 16px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 14px;
-            margin-bottom: 12px;
-            transition: all 0.3s;
-        }
-
-        .user-item:hover {
-            background: rgba(162, 195, 212, 0.1);
-            transform: translateX(-4px);
+            align-items: center;
+            padding: 12px;
+            background: var(--bg);
+            border-radius: 8px;
+            margin-bottom: 10px;
         }
 
         .user-info {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
 
         .user-avatar {
-            width: 44px;
-            height: 44px;
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
-            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
-            font-size: 18px;
-            box-shadow: 0 4px 12px rgba(144, 79, 145, 0.3);
-        }
-
-        .user-details {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+            font-weight: bold;
         }
 
         .user-name {
+            font-size: 14px;
             font-weight: 500;
-            color: var(--primary-light);
         }
 
-        .user-meta {
+        .user-id {
             font-size: 12px;
             color: var(--text-secondary);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 8px;
         }
 
         .btn-icon {
             width: 36px;
             height: 36px;
-            padding: 0;
-            border-radius: 10px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: var(--danger);
+            color: white;
+        }
+
+        .log-item {
+            padding: 12px;
+            background: var(--bg);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-right: 3px solid var(--primary);
+        }
+
+        .log-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .log-message {
             font-size: 14px;
         }
 
-        /* Chart */
-        .chart-wrapper {
-            height: 220px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 20px;
-            margin-top: 16px;
-            position: relative;
-        }
-
-        /* Toast */
         .toast {
             position: fixed;
-            bottom: 30px;
+            bottom: 20px;
             left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: rgba(41, 72, 100, 0.95);
-            backdrop-filter: blur(20px);
-            color: var(--primary-light);
-            padding: 16px 24px;
-            border-radius: 14px;
-            opacity: 0;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
             z-index: 1000;
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
         .toast.show {
             opacity: 1;
-            transform: translateX(-50%) translateY(0);
         }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
         }
 
-        ::-webkit-scrollbar-track {
-            background: transparent;
+        .spinner {
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: var(--glass-border);
-            border-radius: 10px;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--accent-blue);
-        }
-
-        /* Responsive */
-        @media (max-width: 480px) {
-            .container {
-                padding: 16px;
-            }
-            
+        @media (max-width: 600px) {
             .stats-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
             }
-            
-            .header h1 {
-                font-size: 24px;
+
+            .tab {
+                font-size: 12px;
+                padding: 12px 8px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Background Layer -->
-    <div class="bg-layer">
-        <div class="bg-gradient"></div>
-        <div class="glass-orb orb-1"></div>
-        <div class="glass-orb orb-2"></div>
-        <div class="glass-orb orb-3"></div>
+    <div class="header">
+        <h1>🤖 مدیریت گروه بله</h1>
+        <p>داشبورد مدیریت پیشرفته</p>
     </div>
 
-    <!-- Main Container -->
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="header-icon">
-                <i class="fas fa-shield-alt"></i>
-            </div>
-            <h1>پنل مدیریت</h1>
-            <p>کنترل کامل گروه شما</p>
-        </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="dashboard">📊 داشبورد</div>
+        <div class="tab" data-tab="locks">🔒 قفل‌ها</div>
+        <div class="tab" data-tab="users">👥 کاربران</div>
+        <div class="tab" data-tab="welcome">👋 خوش‌آمد</div>
+        <div class="tab" data-tab="logs">📝 لاگ</div>
+    </div>
 
-        <!-- Navigation -->
-        <div class="nav-container">
-            <div class="nav-item active" onclick="switchTab('dashboard')">
-                <i class="fas fa-chart-line"></i>
-                داشبورد
-            </div>
-            <div class="nav-item" onclick="switchTab('settings')">
-                <i class="fas fa-cog"></i>
-                تنظیمات
-            </div>
-            <div class="nav-item" onclick="switchTab('users')">
-                <i class="fas fa-users"></i>
-                کاربران
-            </div>
-            <div class="nav-item" onclick="switchTab('messages')">
-                <i class="fas fa-paper-plane"></i>
-                پیام‌ها
-            </div>
-        </div>
-
-        <!-- Dashboard Tab -->
-        <div id="dashboard" class="tab-content active">
-            <div class="glass-panel">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-chart-bar"></i>
-                    </div>
-                    <div class="section-title">آمار گروه</div>
+    <div class="content">
+        <div class="section active" id="dashboard">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalMembers">0</div>
+                    <div class="stat-label">اعضای گروه</div>
                 </div>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon-wrapper">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stat-value" id="total-users">0</div>
-                        <div class="stat-label">کل کاربران</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon-wrapper">
-                            <i class="fas fa-ban"></i>
-                        </div>
-                        <div class="stat-value" id="banned-users">0</div>
-                        <div class="stat-label">بن شده</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon-wrapper">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="stat-value" id="actions-today">0</div>
-                        <div class="stat-label">اقدامات امروز</div>
-                    </div>
-                    
-                    <div class="stat-card" onclick="openTodayMessages()" style="cursor: pointer;">
-                        <div class="stat-icon-wrapper">
-                            <i class="fas fa-comment-dots"></i>
-                        </div>
-                        <div class="stat-value" id="messages-today">0</div>
-                        <div class="stat-label">پیام‌های امروز</div>
-                    </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="activeLocks">0</div>
+                    <div class="stat-label">قفل‌های فعال</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="vipUsers">0</div>
+                    <div class="stat-label">کاربران VIP</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="warnings">0</div>
+                    <div class="stat-label">اخطارهای امروز</div>
                 </div>
             </div>
 
-            <div class="glass-panel">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-chart-area"></i>
-                    </div>
-                    <div class="section-title">نمودار فعالیت</div>
+            <div class="card">
+                <div class="card-title">⚙️ وضعیت سیستم</div>
+                <div class="switch-item">
+                    <span class="switch-label">🟢 ربات فعال</span>
+                    <span style="color: var(--success);">آنلاین</span>
                 </div>
-                <div class="chart-wrapper">
-                    <canvas id="activityChart"></canvas>
+                <div class="switch-item">
+                    <span class="switch-label">📊 نظارت پیام‌ها</span>
+                    <span style="color: var(--success);">فعال</span>
                 </div>
-            </div>
-        </div>
-
-        <!-- Settings Tab -->
-        <div id="settings" class="tab-content">
-            <div class="glass-panel">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <div class="section-title">تنظیمات امنیتی</div>
-                </div>
-                
-                <div class="setting-row">
-                    <div class="setting-info">
-                        <div class="setting-icon-box">
-                            <i class="fas fa-link"></i>
-                        </div>
-                        <div class="setting-text">
-                            <div class="setting-name">ضد لینک</div>
-                            <div class="setting-desc">حذف خودکار لینک‌ها</div>
-                        </div>
-                    </div>
-                    <div class="toggle-switch active" data-setting="anti_link" onclick="toggleSetting(this)"></div>
-                </div>
-
-                <div class="setting-row">
-                    <div class="setting-info">
-                        <div class="setting-icon-box">
-                            <i class="fas fa-share"></i>
-                        </div>
-                        <div class="setting-text">
-                            <div class="setting-name">ضد فوروارد</div>
-                            <div class="setting-desc">حذف پیام‌های فوروارد</div>
-                        </div>
-                    </div>
-                    <div class="toggle-switch active" data-setting="anti_forward" onclick="toggleSetting(this)"></div>
-                </div>
-
-                <div class="setting-row">
-                    <div class="setting-info">
-                        <div class="setting-icon-box">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <div class="setting-text">
-                            <div class="setting-name">کپچا ورود</div>
-                            <div class="setting-desc">تایید انسان بودن</div>
-                        </div>
-                    </div>
-                    <div class="toggle-switch active" data-setting="captcha_enabled" onclick="toggleSetting(this)"></div>
-                </div>
-
-                <div class="setting-row">
-                    <div class="setting-info">
-                        <div class="setting-icon-box">
-                            <i class="fas fa-ban"></i>
-                        </div>
-                        <div class="setting-text">
-                            <div class="setting-name">ضد اسپم</div>
-                            <div class="setting-desc">جلوگیری از اسپم</div>
-                        </div>
-                    </div>
-                    <div class="toggle-switch active" data-setting="anti_spam" onclick="toggleSetting(this)"></div>
-                </div>
-
-                <div class="setting-row">
-                    <div class="setting-info">
-                        <div class="setting-icon-box">
-                            <i class="fas fa-bolt"></i>
-                        </div>
-                        <div class="setting-text">
-                            <div class="setting-name">ضد فلود</div>
-                            <div class="setting-desc">میوت خودکار پیام‌های پشت‌سرهم زیاد</div>
-                        </div>
-                    </div>
-                    <div class="toggle-switch active" data-setting="anti_flood" onclick="toggleSetting(this)"></div>
-                </div>
-
-                <div class="setting-row">
-                    <div class="setting-info">
-                        <div class="setting-icon-box">
-                            <i class="fas fa-photo-video"></i>
-                        </div>
-                        <div class="setting-text">
-                            <div class="setting-name">محدودیت رسانه عضو جدید</div>
-                            <div class="setting-desc">اعضای تازه‌وارد نمی‌توانند عکس/ویدیو بفرستند</div>
-                        </div>
-                    </div>
-                    <div class="toggle-switch active" data-setting="restrict_new_media" onclick="toggleSetting(this)"></div>
+                <div class="switch-item">
+                    <span class="switch-label">🛡️ محافظت از اسپم</span>
+                    <span style="color: var(--success);">فعال</span>
                 </div>
             </div>
 
-            <div class="glass-panel">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-scroll"></i>
-                    </div>
-                    <div class="section-title">قوانین گروه</div>
-                </div>
-                <div class="input-group">
-                    <label class="input-label">متنی که با دستور /rules برای اعضا نمایش داده می‌شود</label>
-                    <textarea class="input-field" id="rules-text" placeholder="مثلاً: ۱- احترام به اعضا الزامی است..."></textarea>
-                </div>
-            </div>
-
-            <div class="glass-panel">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-sliders-h"></i>
-                    </div>
-                    <div class="section-title">تنظیمات پیشرفته</div>
-                </div>
-                
-                <div class="input-group">
-                    <label class="input-label">کلمات ممنوعه</label>
-                    <input type="text" class="input-field" id="banned-words" placeholder="کلمه1, کلمه2, کلمه3">
-                </div>
-
-                <div class="input-group">
-                    <label class="input-label">پیام خوش‌آمدگویی</label>
-                    <textarea class="input-field" id="welcome-message" placeholder="پیام خوش‌آمدگویی خود را وارد کنید..."></textarea>
-                </div>
-
-                <button class="btn" onclick="saveAdvancedSettings()">
-                    <i class="fas fa-save"></i>
-                    ذخیره تنظیمات
+            <div class="card">
+                <div class="card-title">🎯 اقدامات سریع</div>
+                <button class="btn btn-primary btn-block" onclick="refreshData()">
+                    🔄 بروزرسانی داده‌ها
                 </button>
             </div>
         </div>
 
-        <!-- Users Tab -->
-        <div id="users" class="tab-content">
-            <div class="glass-panel">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <div class="section-title">جستجوی کاربر</div>
+        <div class="section" id="locks">
+            <div class="card">
+                <div class="card-title">🔒 مدیریت قفل‌ها</div>
+                
+                <div class="switch-item">
+                    <span class="switch-label">🔗 قفل لینک</span>
+                    <label class="switch">
+                        <input type="checkbox" id="lock_link" onchange="updateLock('lock_link', this.checked)">
+                        <span class="slider"></span>
+                    </label>
                 </div>
-                <div class="input-group">
-                    <input type="text" class="input-field" id="user-search" placeholder="نام کاربر..." oninput="renderUsersList()">
+
+                <div class="switch-item">
+                    <span class="switch-label">📤 قفل فوروارد</span>
+                    <label class="switch">
+                        <input type="checkbox" id="lock_forward" onchange="updateLock('lock_forward', this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="switch-item">
+                    <span class="switch-label">🎨 قفل استیکر</span>
+                    <label class="switch">
+                        <input type="checkbox" id="lock_sticker" onchange="updateLock('lock_sticker', this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="switch-item">
+                    <span class="switch-label">📷 قفل مدیا</span>
+                    <label class="switch">
+                        <input type="checkbox" id="lock_media" onchange="updateLock('lock_media', this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="switch-item">
+                    <span class="switch-label">🔤 قفل انگلیسی</span>
+                    <label class="switch">
+                        <input type="checkbox" id="lock_english" onchange="updateLock('lock_english', this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="switch-item">
+                    <span class="switch-label">📝 قفل پیام طولانی</span>
+                    <label class="switch">
+                        <input type="checkbox" id="lock_long_msg" onchange="updateLock('lock_long_msg', this.checked)">
+                        <span class="slider"></span>
+                    </label>
                 </div>
             </div>
 
-            <div class="glass-panel">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-user-shield"></i>
-                    </div>
-                    <div class="section-title">کاربران گروه</div>
-                </div>
-                <div id="users-list">
-                    <p style="opacity: 0.6; text-align: center; padding: 20px;">در حال بارگذاری...</p>
+            <div class="card">
+                <div class="card-title">⚠️ تنظیمات اخطار</div>
+                <div class="form-group">
+                    <label class="form-label">حداکثر اخطار قبل از بن</label>
+                    <input type="number" class="form-input" id="max_warnings" value="3" min="1" max="10"
+                           onchange="updateSetting('max_warnings', this.value)">
                 </div>
             </div>
         </div>
 
-        <!-- Messages Tab -->
-        <div id="messages" class="tab-content">
-            <div class="glass-panel">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-list"></i>
+        <div class="section" id="users">
+            <div class="card">
+                <div class="card-title">⭐ کاربران VIP</div>
+                <div id="vipList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>در حال بارگذاری...</p>
                     </div>
-                    <div class="section-title">پیام‌های امروز</div>
-                </div>
-                <div id="message-log-list">
-                    <p style="opacity: 0.6; text-align: center; padding: 20px;">برای دیدن پیام‌ها روی کارت «پیام‌های امروز» در داشبورد بزن.</p>
                 </div>
             </div>
 
-            <div class="glass-panel">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-broadcast-tower"></i>
+            <div class="card">
+                <div class="card-title">⚠️ کاربران دارای اخطار</div>
+                <div id="warningsList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>در حال بارگذاری...</p>
                     </div>
-                    <div class="section-title">ارسال پیام همگانی</div>
                 </div>
-                <div class="input-group">
-                    <label class="input-label">متن پیام</label>
-                    <textarea class="input-field" id="broadcast-message" placeholder="پیام خود را وارد کنید..."></textarea>
+            </div>
+        </div>
+
+        <div class="section" id="welcome">
+            <div class="card">
+                <div class="card-title">👋 تنظیمات خوش‌آمدگویی</div>
+                
+                <div class="switch-item">
+                    <span class="switch-label">فعال‌سازی خوش‌آمدگویی</span>
+                    <label class="switch">
+                        <input type="checkbox" id="welcome_enabled" onchange="updateSetting('welcome_enabled', this.checked)">
+                        <span class="slider"></span>
+                    </label>
                 </div>
-                <button class="btn" onclick="sendBroadcast()">
-                    <i class="fas fa-paper-plane"></i>
-                    ارسال به همه
-                </button>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label class="form-label">متن خوش‌آمدگویی</label>
+                    <textarea class="form-textarea" id="welcome_text" 
+                              placeholder="سلام {name} عزیز! به گروه خوش آمدید 🌹"
+                              onchange="updateSetting('welcome_text', this.value)"></textarea>
+                    <small style="color: var(--text-secondary); margin-top: 5px; display: block;">
+                        💡 از {name} برای نمایش نام کاربر استفاده کنید
+                    </small>
+                </div>
             </div>
 
-            <div class="glass-panel">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-clock"></i>
+            <div class="card">
+                <div class="card-title">🧩 تنظیمات کپچا</div>
+                
+                <div class="switch-item">
+                    <span class="switch-label">فعال‌سازی کپچای ورود</span>
+                    <label class="switch">
+                        <input type="checkbox" id="captcha_enabled" onchange="updateSetting('captcha_enabled', this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <small style="color: var(--text-secondary); margin-top: 10px; display: block;">
+                    🛡️ با فعال‌سازی کپچا، کاربران جدید باید دکمه تایید را بزنند
+                </small>
+            </div>
+        </div>
+
+        <div class="section" id="logs">
+            <div class="card">
+                <div class="card-title">📝 فعالیت‌های اخیر</div>
+                <div id="logsList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>در حال بارگذاری...</p>
                     </div>
-                    <div class="section-title">پیام زمان‌بندی شده</div>
                 </div>
-                <div class="input-group">
-                    <label class="input-label">متن پیام</label>
-                    <textarea class="input-field" id="scheduled-message" placeholder="پیام را وارد کنید..."></textarea>
-                </div>
-                <div class="input-group">
-                    <label class="input-label">زمان ارسال</label>
-                    <input type="datetime-local" class="input-field" id="scheduled-time">
-                </div>
-                <button class="btn btn-secondary" onclick="scheduleMessage()">
-                    <i class="fas fa-calendar-check"></i>
-                    زمان‌بندی پیام
-                </button>
             </div>
         </div>
     </div>
 
-    <!-- Toast -->
     <div class="toast" id="toast"></div>
 
     <script>
@@ -1112,239 +591,232 @@
         tg.expand();
         tg.ready();
 
-        let settings = {
-            anti_link: true,
-            anti_forward: true,
-            captcha_enabled: true,
-            anti_spam: true,
-            anti_flood: true,
-            restrict_new_media: true
-        };
+        // ⚠️ مهم: این آدرس را با آدرس سرور Render خود عوض کنید
+        const API_BASE_URL = "https://YOUR-APP.onrender.com/api";
 
-        let chatData = {};
+        let chatId = null;
+        const urlParams = new URLSearchParams(window.location.search);
+        chatId = urlParams.get('chat_id') || tg.initDataUnsafe?.user?.id;
 
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+                
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById(tabName).classList.add('active');
+                
+                loadSectionData(tabName);
             });
-            document.querySelectorAll('.nav-item').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            document.getElementById(tabName).classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
+        });
 
-        function escapeHtml(str) {
-            const div = document.createElement('div');
-            div.textContent = str || '';
-            return div.innerHTML;
-        }
+        async function apiRequest(action, data = {}) {
+            try {
+                let url = `${API_BASE_URL}/${action}`;
+                let options = {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
 
-        function openTodayMessages() {
-            // فعال کردن دستی تب "پیام‌ها" بدون نیاز به event.currentTarget
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-            document.getElementById('messages').classList.add('active');
-            document.querySelectorAll('.nav-item')[3].classList.add('active'); // چهارمین آیتم = «پیام‌ها»
-
-            const container = document.getElementById('message-log-list');
-            const items = (chatData && chatData.today_messages) || [];
-
-            if (items.length === 0) {
-                container.innerHTML = '<p style="opacity: 0.6; text-align: center; padding: 20px;">هنوز پیامی امروز ثبت نشده.</p>';
-                return;
-            }
-
-            container.innerHTML = items.map(m => `
-                <div class="message-log-item ${m.deleted ? 'deleted' : ''}">
-                    <div class="message-log-header">
-                        <span class="message-log-sender">${escapeHtml(m.name)}</span>
-                        <span class="message-log-time">${escapeHtml(m.time)}</span>
-                    </div>
-                    <div class="message-log-text">${escapeHtml(m.text)}</div>
-                    ${m.deleted ? `<div class="message-log-deleted-badge">🗑 حذف شد${m.reason ? ' — ' + escapeHtml(m.reason) : ''}</div>` : ''}
-                </div>
-            `).join('');
-        }
-
-        function renderUsersList() {
-            const container = document.getElementById('users-list');
-            const query = (document.getElementById('user-search').value || '').trim().toLowerCase();
-            const items = (chatData && chatData.users_list) || [];
-
-            const filtered = query
-                ? items.filter(u => (u.name || '').toLowerCase().includes(query) || (u.username || '').toLowerCase().includes(query))
-                : items;
-
-            if (filtered.length === 0) {
-                container.innerHTML = '<p style="opacity: 0.6; text-align: center; padding: 20px;">کاربری پیدا نشد.</p>';
-                return;
-            }
-
-            container.innerHTML = filtered.map(u => {
-                let badge;
-                if (u.banned) {
-                    badge = '<span class="user-list-badge banned">⛔️ بن‌شده</span>';
-                } else if (u.warnings > 0) {
-                    badge = `<span class="user-list-badge warn">⚠️ ${u.warnings}/3</span>`;
-                } else {
-                    badge = '<span class="user-list-badge ok">✅ عادی</span>';
+                if (chatId) {
+                    url += `?chat_id=${chatId}`;
                 }
-                return `
-                    <div class="user-list-item ${u.banned ? 'banned' : ''}">
-                        <div>
-                            <div class="user-list-name">${escapeHtml(u.name)}</div>
-                            <div class="user-list-meta">${u.username ? '@' + escapeHtml(u.username) + ' • ' : ''}عضو از ${escapeHtml(u.joined || '-')}</div>
+
+                if (data && Object.keys(data).length > 0 && action === 'settings') {
+                    options.method = 'POST';
+                    options.body = JSON.stringify({
+                        chat_id: chatId,
+                        ...data
+                    });
+                }
+
+                if (action === 'vip' && data.user_id) {
+                    options.method = 'DELETE';
+                    url += `&user_id=${data.user_id}`;
+                }
+                if (action === 'warnings' && data.user_id) {
+                    options.method = 'DELETE';
+                    url += `&user_id=${data.user_id}`;
+                }
+
+                console.log(`📡 API Request:`, { url, options });
+
+                const response = await fetch(url, options);
+                const result = await response.json();
+
+                console.log(`📥 API Response:`, result);
+                return result;
+
+            } catch (error) {
+                console.error(`❌ API Error:`, error);
+                showToast(`❌ خطا در ارتباط با سرور`);
+                return { ok: false };
+            }
+        }
+
+        async function loadDashboard() {
+            const response = await apiRequest('stats');
+            if (response.ok) {
+                document.getElementById('totalMembers').textContent = response.result.totalMembers;
+                document.getElementById('activeLocks').textContent = response.result.activeLocks;
+                document.getElementById('vipUsers').textContent = response.result.vipUsers;
+                document.getElementById('warnings').textContent = response.result.warnings;
+            }
+        }
+
+        async function loadSettings() {
+            const response = await apiRequest('settings');
+            if (response.ok) {
+                const settings = response.result;
+                
+                Object.keys(settings).forEach(key => {
+                    const element = document.getElementById(key);
+                    if (element) {
+                        if (element.type === 'checkbox') {
+                            element.checked = Boolean(settings[key]);
+                        } else if (element.type === 'number') {
+                            element.value = settings[key];
+                        } else if (element.tagName === 'TEXTAREA') {
+                            element.value = settings[key] || '';
+                        }
+                    }
+                });
+            }
+        }
+
+        async function loadVipUsers() {
+            const response = await apiRequest('vip');
+            const container = document.getElementById('vipList');
+            
+            if (response.ok && response.result && response.result.length > 0) {
+                container.innerHTML = response.result.map(user => `
+                    <div class="user-item">
+                        <div class="user-info">
+                            <div class="user-avatar">${(user.name || '?').charAt(0)}</div>
+                            <div>
+                                <div class="user-name">${user.name || 'کاربر'}</div>
+                                <div class="user-id">${user.id}</div>
+                            </div>
                         </div>
-                        ${badge}
+                        <div class="user-actions">
+                            <button class="btn-icon" onclick="removeVip(${user.id})">❌</button>
+                        </div>
                     </div>
-                `;
-            }).join('');
-        }
-
-        function toggleSetting(element) {
-            const setting = element.dataset.setting;
-            element.classList.toggle('active');
-            settings[setting] = element.classList.contains('active');
-            showToast(`${setting} ${settings[setting] ? 'فعال' : 'غیرفعال'} شد`);
-        }
-
-        function saveAdvancedSettings() {
-            const bannedWords = document.getElementById('banned-words').value;
-            const welcomeMessage = document.getElementById('welcome-message').value;
-            const rulesText = document.getElementById('rules-text').value;
-
-            tg.sendData(JSON.stringify({
-                type: 'save_settings',
-                chat_id: chatData.chat_id,
-                settings: settings,
-                banned_words: bannedWords.split(',').map(w => w.trim()).filter(w => w.length > 0),
-                welcome_message: welcomeMessage,
-                rules_text: rulesText
-            }));
-            showToast('تنظیمات ذخیره شد');
-        }
-
-        function sendBroadcast() {
-            const message = document.getElementById('broadcast-message').value;
-            if (!message) {
-                showToast('لطفاً متن پیام را وارد کنید');
-                return;
+                `).join('');
+            } else {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">کاربر VIP وجود ندارد</p>';
             }
-            
-            tg.sendData(JSON.stringify({
-                type: 'broadcast',
-                chat_id: chatData.chat_id,
-                message: message
-            }));
-            showToast('پیام ارسال شد');
-            document.getElementById('broadcast-message').value = '';
         }
 
-        function scheduleMessage() {
-            const message = document.getElementById('scheduled-message').value;
-            const time = document.getElementById('scheduled-time').value;
+        async function loadWarnings() {
+            const response = await apiRequest('warnings');
+            const container = document.getElementById('warningsList');
             
-            if (!message || !time) {
-                showToast('لطفاً پیام و زمان را وارد کنید');
-                return;
+            if (response.ok && response.result && response.result.length > 0) {
+                container.innerHTML = response.result.map(user => `
+                    <div class="user-item">
+                        <div class="user-info">
+                            <div class="user-avatar">${(user.name || '?').charAt(0)}</div>
+                            <div>
+                                <div class="user-name">${user.name || 'کاربر'}</div>
+                                <div class="user-id">${user.count} اخطار</div>
+                            </div>
+                        </div>
+                        <div class="user-actions">
+                            <button class="btn-icon" style="background: var(--success);" onclick="clearWarnings(${user.id})">✅</button>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">اخطاری ثبت نشده</p>';
             }
+        }
+
+        async function loadLogs() {
+            const response = await apiRequest('logs');
+            const container = document.getElementById('logsList');
             
-            tg.sendData(JSON.stringify({
-                type: 'schedule_message',
-                chat_id: chatData.chat_id,
-                message: message,
-                time: time
-            }));
-            showToast('پیام زمان‌بندی شد');
+            if (response.ok && response.result && response.result.length > 0) {
+                container.innerHTML = response.result.map(log => `
+                    <div class="log-item">
+                        <div class="log-time">${log.time}</div>
+                        <div class="log-message">${log.message}</div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">لاگی وجود ندارد</p>';
+            }
+        }
+
+        function loadSectionData(section) {
+            switch(section) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'locks':
+                    loadSettings();
+                    break;
+                case 'users':
+                    loadVipUsers();
+                    loadWarnings();
+                    break;
+                case 'welcome':
+                    loadSettings();
+                    break;
+                case 'logs':
+                    loadLogs();
+                    break;
+            }
+        }
+
+        async function updateLock(key, value) {
+            await apiRequest('settings', { key, value });
+            showToast(value ? `✅ قفل فعال شد` : `🔓 قفل غیرفعال شد`);
+            loadDashboard();
+        }
+
+        async function updateSetting(key, value) {
+            await apiRequest('settings', { key, value });
+            showToast(`✅ تنظیمات ذخیره شد`);
+        }
+
+        async function removeVip(userId) {
+            if (confirm('آیا مطمئن هستید؟')) {
+                await apiRequest('vip', { user_id: userId });
+                showToast(`✅ کاربر از VIP حذف شد`);
+                loadVipUsers();
+                loadDashboard();
+            }
+        }
+
+        async function clearWarnings(userId) {
+            await apiRequest('warnings', { user_id: userId });
+            showToast(`✅ اخطارها پاک شد`);
+            loadWarnings();
+            loadDashboard();
+        }
+
+        function refreshData() {
+            loadDashboard();
+            loadSettings();
+            showToast(`🔄 داده‌ها بروزرسانی شد`);
         }
 
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+            setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        const WEEKDAY_FA = {Sat: 'ش', Sun: 'ی', Mon: 'د', Tue: 'س', Wed: 'چ', Thu: 'پ', Fri: 'ج'};
-
-        function drawChart() {
-            const canvas = document.getElementById('activityChart');
-            const ctx = canvas.getContext('2d');
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
-
-            const weekly = (chatData && chatData.weekly_stats) || [];
-            const data = weekly.length ? weekly.map(d => d.count) : [0, 0, 0, 0, 0, 0, 0];
-            const labels = weekly.length ? weekly.map(d => WEEKDAY_FA[d.label] || d.label) : ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            const barWidth = canvas.width / data.length - 20;
-            const maxVal = Math.max(...data, 1);
-
-            data.forEach((val, i) => {
-                const barHeight = (val / maxVal) * (canvas.height - 40);
-                const x = i * (canvas.width / data.length) + 10;
-                const y = canvas.height - barHeight - 20;
-                
-                const gradient = ctx.createLinearGradient(0, y, 0, canvas.height);
-                gradient.addColorStop(0, 'rgba(144, 79, 145, 0.8)');
-                gradient.addColorStop(1, 'rgba(162, 195, 212, 0.4)');
-                
-                ctx.fillStyle = gradient;
-                ctx.fillRect(x, y, barWidth, barHeight);
-                
-                ctx.fillStyle = 'rgba(217, 228, 222, 0.7)';
-                ctx.font = '12px Vazirmatn';
-                ctx.textAlign = 'center';
-                ctx.fillText(labels[i], x + barWidth/2, canvas.height - 5);
-            });
-        }
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const dataEncoded = urlParams.get('data');
-
-        if (dataEncoded) {
-            try {
-                const data = JSON.parse(atob(dataEncoded));
-                chatData = data;
-                
-                if (data.settings) {
-                    settings = data.settings;
-                    document.querySelectorAll('.toggle-switch').forEach(toggle => {
-                        const setting = toggle.dataset.setting;
-                        if (settings[setting]) {
-                            toggle.classList.add('active');
-                        } else {
-                            toggle.classList.remove('active');
-                        }
-                    });
-                }
-                
-                if (data.stats) {
-                    document.getElementById('total-users').textContent = data.stats.total_users || 0;
-                    document.getElementById('banned-users').textContent = data.stats.banned_users || 0;
-                    document.getElementById('actions-today').textContent = data.stats.actions_today || 0;
-                    document.getElementById('messages-today').textContent = data.stats.messages_today || 0;
-                }
-
-                document.getElementById('banned-words').value = data.banned_words || '';
-                document.getElementById('welcome-message').value = data.welcome_message || '';
-                document.getElementById('rules-text').value = data.rules_text || '';
-
-                renderUsersList();
-                setTimeout(drawChart, 500);
-                
-            } catch (e) {
-                console.error('Error:', e);
-            }
-        }
-
-        window.addEventListener('resize', drawChart);
+        window.addEventListener('load', () => {
+            loadDashboard();
+            loadSettings();
+        });
     </script>
 </body>
 </html>
