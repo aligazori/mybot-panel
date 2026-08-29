@@ -643,21 +643,25 @@ def bot_loop():
             print(f"[ERROR] {e}")
             time.sleep(5)
 
-# ══════════════════════════════════════════════
-#  شروع برنامه
-# ══════════════════════════════════════════════
-def run_flask():
-    """اجرای سرور Flask"""
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
 
-if __name__ == '__main__':
-    init_db()
-    
-    # شروع سرور API در یک thread جداگانه
-    flask_thread = threading.Thread(target=run_flask, daemon=True)
-    flask_thread.start()
-    print("🌐 سرور API فعال شد")
-    
-    # شروع ربات اصلی
+# ══════════════════════════════════════════════
+#  شروع برنامه (سازگار با سرور Render)
+# ══════════════════════════════════════════════
+
+# 1. ساخت جداول دیتابیس به محض روشن شدن سرور
+init_db()
+
+# 2. تعریف تابعی برای اجرای ربات در پس‌زمینه
+def start_bot_background():
+    print("=" * 50)
+    print("🤖 ربات بله در پس‌زمینه شروع به کار کرد")
+    print("=" * 50)
     bot_loop()
+
+# 3. اجرای ربات در یک Thread جداگانه
+# (daemon=True یعنی اگر سرور خاموش شد، ربات هم خاموش شود)
+bot_thread = threading.Thread(target=start_bot_background, daemon=True)
+bot_thread.start()
+
+# نکته مهم: سرور Flask (همان app) به صورت خودکار توسط Render/Gunicorn اجرا می‌شود
+# و نیازی به کد اضافه برای آن در اینجا نیست.
