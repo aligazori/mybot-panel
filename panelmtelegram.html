@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>پنل مدیریت</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary-dark: #294864;
+            --primary-light: #D9E4DE;
+            --accent-blue: #A2C3D4;
+            --accent-purple: #904F91;
+            --glass-bg: rgba(217, 228, 222, 0.08);
+            --glass-border: rgba(217, 228, 222, 0.15);
+            --glass-highlight: rgba(255, 255, 255, 0.1);
+            --text-primary: #D9E4DE;
+            --text-secondary: rgba(217, 228, 222, 0.6);
+            --shadow: 0 8px 32px rgba(41, 72, 100, 0.4);
+        }
+
+        body {
+            font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Liquid Glass Background */
+        .bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-gradient {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(144, 79, 145, 0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(162, 195, 212, 0.25) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(41, 72, 100, 0.4) 0%, transparent 50%);
+            animation: gradientMove 20s ease-in-out infinite;
+        }
+
+        @keyframes gradientMove {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        .glass-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.4;
+            animation: orbFloat 25s infinite ease-in-out;
+        }
+
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: var(--accent-purple);
+            top: -150px;
+            right: -150px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent-blue);
+            bottom: -100px;
+            left: -100px;
+            animation-delay: -8s;
+        }
+
+        .orb-3 {
+            width: 350px;
+            height: 350px;
+            background: var(--primary-light);
+            top: 50%;
+            left: 50%;
+            opacity: 0.2;
+            animation-delay: -16s;
+        }
+
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(50px, -80px) scale(1.15); }
+            66% { transform: translate(-40px, 40px) scale(0.85); }
+        }
+
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            padding: 24px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Liquid Glass Card - REAL Glass Effect */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 28px;
+            margin-bottom: 20px;
+            box-shadow: 
+                var(--shadow),
+                inset 0 1px 0 var(--glass-highlight),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.3), 
+                transparent);
+        }
+
+        .glass-panel::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(
+                circle at center,
+                rgba(255, 255, 255, 0.05) 0%,
+                transparent 70%
+            );
+            opacity: 0;
+            transition: opacity 0.4s;
+            pointer-events: none;
+        }
+
+        .glass-panel:hover::after {
+            opacity: 1;
+        }
+
+        .glass-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 12px 40px rgba(41, 72, 100, 0.5),
+                inset 0 1px 0 var(--glass-highlight);
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding: 40px 20px;
+        }
+
+        .header-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            box-shadow: 
+                0 10px 30px rgba(144, 79, 145, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.3), transparent);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 400;
+        }
+
+        /* Navigation */
+        .nav-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding: 4px;
+            scrollbar-width: none;
+        }
+
+        .nav-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-item {
+            flex: 0 0 auto;
+            padding: 14px 24px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        }
+
+        .nav-item.active {
+            background: rgba(162, 195, 212, 0.15);
+            color: var(--primary-light);
+            border-color: rgba(162, 195, 212, 0.3);
+            box-shadow: 0 4px 20px rgba(162, 195, 212, 0.2);
+        }
+
+        .nav-item:hover {
+            background: rgba(162, 195, 212, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .nav-item i {
+            font-size: 16px;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Section Title */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(144, 79, 145, 0.3);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary-light);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(41, 72, 100, 0.4);
+        }
+
+        .stat-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 4px 12px rgba(144, 79, 145, 0.3);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-light);
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        /* Settings List */
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .setting-row:last-child {
+            border-bottom: none;
+        }
+
+        .setting-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .setting-icon-box {
+            width: 44px;
+            height: 44px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--accent-blue);
+            transition: all 0.3s;
+        }
+
+        .setting-row:hover .setting-icon-box {
+            background: rgba(162, 195, 212, 0.15);
+            transform: scale(1.05);
+        }
+
+        .setting-text {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .setting-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--primary-light);
+        }
+
+        .setting-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 56px;
+            height: 30px;
+            background: rgba(41, 72, 100, 0.5);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--glass-border);
+        }
+
+        .toggle-switch.active {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            box-shadow: 0 4px 16px rgba(144, 79, 145, 0.4);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            right: 2px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.active::after {
+            right: 28px;
+        }
+
+        /* Input Fields */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 16px 18px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            color: var(--primary-light);
+            font-size: 15px;
+            font-family: 'Vazirmatn', sans-serif;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .input-field:focus {
+            background: rgba(162, 195, 212, 0.1);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(162, 195, 212, 0.15);
+        }
+
+        .input-field::placeholder {
+            color: var(--text-secondary);
+        }
+
+        textarea.input-field {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Vazirmatn', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 24px rgba(144, 79, 145, 0.4);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.2), transparent);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 4px 16px rgba(144, 79, 145, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            box-shadow: none;
+            color: var(--primary-light);
+        }
+
+        .btn-secondary::before {
+            display: none;
+        }
+
+        /* User List */
+        .user-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+
+        .user-item:hover {
+            background: rgba(162, 195, 212, 0.1);
+            transform: translateX(-4px);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .user-avatar {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(144, 79, 145, 0.3);
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--primary-light);
+        }
+
+        .user-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        /* Chart */
+        .chart-wrapper {
+            height: 220px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 16px;
+            position: relative;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(41, 72, 100, 0.95);
+            backdrop-filter: blur(20px);
+            color: var(--primary-light);
+            padding: 16px 24px;
+            border-radius: 14px;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            font-weight: 500;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--glass-border);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-blue);
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Layer -->
+    <div class="bg-layer">
+        <div class="bg-gradient"></div>
+        <div class="glass-orb orb-1"></div>
+        <div class="glass-orb orb-2"></div>
+        <div class="glass-orb orb-3"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h1>پنل مدیریت</h1>
+            <p>کنترل کامل گروه شما</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-container">
+            <div class="nav-item active" onclick="switchTab('dashboard')">
+                <i class="fas fa-chart-line"></i>
+                داشبورد
+            </div>
+            <div class="nav-item" onclick="switchTab('settings')">
+                <i class="fas fa-cog"></i>
+                تنظیمات
+            </div>
+            <div class="nav-item" onclick="switchTab('users')">
+                <i class="fas fa-users"></i>
+                کاربران
+            </div>
+            <div class="nav-item" onclick="switchTab('messages')">
+                <i class="fas fa-paper-plane"></i>
+                پیام‌ها
+            </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="glass-panel">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="section-title">آمار گروه</div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-value" id="total-users">0</div>
+                        <div class="stat-label">کل کاربران</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-ban"></i>
+                        </div>
+                        <div class="stat-value" id="banned-users">0</div>
+                        <div class="stat-label">بن شده</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-value" id="actions-today">0</div>
+                        <div class="stat-label">اقدامات امروز</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-comment-dots"></i>
+                        </div>
+                        <div class="stat-value" id="messages-today">0</div>
+                        <div class="stat-label">پیام‌های امروز</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-chart-area"></i>
+                    </div>
+                    <div class="section-title">نمودار فعالیت</div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content">
+            <div class="glass-panel">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="section-title">تنظیمات امنیتی</div>
+                </div>
+                
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-icon-box">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <div class="setting-text">
+                            <div class="setting-name">ضد لینک</div>
+                            <div class="setting-desc">حذف خودکار لینک‌ها</div>
+                        </div>
+                    </div>
+                    <div class="toggle-switch active" data-setting="anti_link" onclick="toggleSetting(this)"></div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-icon-box">
+                            <i class="fas fa-share"></i>
+                        </div>
+                        <div class="setting-text">
+                            <div class="setting-name">ضد فوروارد</div>
+                            <div class="setting-desc">حذف پیام‌های فوروارد</div>
+                        </div>
+                    </div>
+                    <div class="toggle-switch active" data-setting="anti_forward" onclick="toggleSetting(this)"></div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-icon-box">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="setting-text">
+                            <div class="setting-name">کپچا ورود</div>
+                            <div class="setting-desc">تایید انسان بودن</div>
+                        </div>
+                    </div>
+                    <div class="toggle-switch active" data-setting="captcha_enabled" onclick="toggleSetting(this)"></div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-icon-box">
+                            <i class="fas fa-ban"></i>
+                        </div>
+                        <div class="setting-text">
+                            <div class="setting-name">ضد اسپم</div>
+                            <div class="setting-desc">جلوگیری از اسپم</div>
+                        </div>
+                    </div>
+                    <div class="toggle-switch active" data-setting="anti_spam" onclick="toggleSetting(this)"></div>
+                </div>
+            </div>
+
+            <div class="glass-panel">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-sliders-h"></i>
+                    </div>
+                    <div class="section-title">تنظیمات پیشرفته</div>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">کلمات ممنوعه</label>
+                    <input type="text" class="input-field" id="banned-words" placeholder="کلمه1, کلمه2, کلمه3">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">پیام خوش‌آمدگویی</label>
+                    <textarea class="input-field" id="welcome-message" placeholder="پیام خوش‌آمدگویی خود را وارد کنید..."></textarea>
+                </div>
+
+                <button class="btn" onclick="saveAdvancedSettings()">
+                    <i class="fas fa-save"></i>
+                    ذخیره تنظیمات
+                </button>
+            </div>
+        </div>
+
+        <!-- Users Tab -->
+        <div id="users" class="tab-content">
+            <div class="glass-panel">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="section-title">کاربران بن شده</div>
+                </div>
+                <div id="banned-users-list">
+                    <!-- Users will be loaded here -->
+                </div>
+            </div>
+
+            <div class="glass-panel">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="section-title">جستجوی کاربر</div>
+                </div>
+                <div class="input-group">
+                    <input type="text" class="input-field" id="user-search" placeholder="نام یا آیدی کاربر...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages Tab -->
+        <div id="messages" class="tab-content">
+            <div class="glass-panel">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-broadcast-tower"></i>
+                    </div>
+                    <div class="section-title">ارسال پیام همگانی</div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">متن پیام</label>
+                    <textarea class="input-field" id="broadcast-message" placeholder="پیام خود را وارد کنید..."></textarea>
+                </div>
+                <button class="btn" onclick="sendBroadcast()">
+                    <i class="fas fa-paper-plane"></i>
+                    ارسال به همه
+                </button>
+            </div>
+
+            <div class="glass-panel">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="section-title">پیام زمان‌بندی شده</div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">متن پیام</label>
+                    <textarea class="input-field" id="scheduled-message" placeholder="پیام را وارد کنید..."></textarea>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">زمان ارسال</label>
+                    <input type="datetime-local" class="input-field" id="scheduled-time">
+                </div>
+                <button class="btn btn-secondary" onclick="scheduleMessage()">
+                    <i class="fas fa-calendar-check"></i>
+                    زمان‌بندی پیام
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        let settings = {
+            anti_link: true,
+            anti_forward: true,
+            captcha_enabled: true,
+            anti_spam: true
+        };
+
+        let chatData = {};
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-item').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function toggleSetting(element) {
+            const setting = element.dataset.setting;
+            element.classList.toggle('active');
+            settings[setting] = element.classList.contains('active');
+            showToast(`${setting} ${settings[setting] ? 'فعال' : 'غیرفعال'} شد`);
+        }
+
+        function saveAdvancedSettings() {
+            const bannedWords = document.getElementById('banned-words').value;
+            const welcomeMessage = document.getElementById('welcome-message').value;
+            
+            tg.sendData(JSON.stringify({
+                type: 'save_advanced_settings',
+                banned_words: bannedWords.split(',').map(w => w.trim()),
+                welcome_message: welcomeMessage
+            }));
+            showToast('تنظیمات ذخیره شد');
+        }
+
+        function sendBroadcast() {
+            const message = document.getElementById('broadcast-message').value;
+            if (!message) {
+                showToast('لطفاً متن پیام را وارد کنید');
+                return;
+            }
+            
+            tg.sendData(JSON.stringify({
+                type: 'broadcast',
+                message: message
+            }));
+            showToast('پیام ارسال شد');
+            document.getElementById('broadcast-message').value = '';
+        }
+
+        function scheduleMessage() {
+            const message = document.getElementById('scheduled-message').value;
+            const time = document.getElementById('scheduled-time').value;
+            
+            if (!message || !time) {
+                showToast('لطفاً پیام و زمان را وارد کنید');
+                return;
+            }
+            
+            tg.sendData(JSON.stringify({
+                type: 'schedule_message',
+                message: message,
+                time: time
+            }));
+            showToast('پیام زمان‌بندی شد');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function drawChart() {
+            const canvas = document.getElementById('activityChart');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            const data = [30, 45, 25, 60, 40, 55, 35];
+            const labels = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const barWidth = canvas.width / data.length - 20;
+            const maxVal = Math.max(...data);
+            
+            data.forEach((val, i) => {
+                const barHeight = (val / maxVal) * (canvas.height - 40);
+                const x = i * (canvas.width / data.length) + 10;
+                const y = canvas.height - barHeight - 20;
+                
+                const gradient = ctx.createLinearGradient(0, y, 0, canvas.height);
+                gradient.addColorStop(0, 'rgba(144, 79, 145, 0.8)');
+                gradient.addColorStop(1, 'rgba(162, 195, 212, 0.4)');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, y, barWidth, barHeight);
+                
+                ctx.fillStyle = 'rgba(217, 228, 222, 0.7)';
+                ctx.font = '12px Vazirmatn';
+                ctx.textAlign = 'center';
+                ctx.fillText(labels[i], x + barWidth/2, canvas.height - 5);
+            });
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const dataEncoded = urlParams.get('data');
+
+        if (dataEncoded) {
+            try {
+                const data = JSON.parse(atob(dataEncoded));
+                chatData = data;
+                
+                if (data.settings) {
+                    settings = data.settings;
+                    document.querySelectorAll('.toggle-switch').forEach(toggle => {
+                        const setting = toggle.dataset.setting;
+                        if (settings[setting]) {
+                            toggle.classList.add('active');
+                        } else {
+                            toggle.classList.remove('active');
+                        }
+                    });
+                }
+                
+                if (data.stats) {
+                    document.getElementById('total-users').textContent = data.stats.total_users || 0;
+                    document.getElementById('banned-users').textContent = data.stats.banned_users || 0;
+                    document.getElementById('actions-today').textContent = data.stats.actions_today || 0;
+                    document.getElementById('messages-today').textContent = data.stats.messages_today || 0;
+                }
+                
+                setTimeout(drawChart, 500);
+                
+            } catch (e) {
+                console.error('Error:', e);
+            }
+        }
+
+        window.addEventListener('resize', drawChart);
+    </script>
+</body>
+</html>
