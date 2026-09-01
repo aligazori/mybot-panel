@@ -320,20 +320,69 @@
 
 <script>
 /* =========================================================
-   آزمایشگاه ذهن — Mini App Demo
+   آزمایشگاه ذهن — Mini App (وصل‌شده به بک‌اند بله)
    -----------------------------------------------------------
-   این فایل یک نسخه نمایشی و کاملاً سمت‌کلاینت از مینی‌اپه.
-   برای وصل کردنش به ربات واقعی تلگرام:
-   1) از window.Telegram.WebApp.initDataUnsafe.user.id به‌جای
-      state.user.id استفاده کن تا هویت واقعی کاربر تلگرام بیاد.
-   2) در finishGame(), به‌جای فقط آپدیت کردن state محلی، یک
-      fetch POST به سرور خودت بزن (همون endpoint شبیه /results
-      در بک‌اند پایتونی) تا نتیجه با HMAC توسط خود سرور امضا و
-      ذخیره بشه. امضای HMAC رو هرگز سمت کلاینت انجام نده چون
-      RESULT_SECRET باید فقط روی سرور بمونه.
-   3) رتبه‌بندی صفحه leaderboard الان نمونه/دمو هست؛ باید با
-      یک GET به سرور (مثلاً /api/leaderboard) جایگزین بشه.
+   این نسخه به /api/init و /api/submit و /api/leaderboard روی
+   همون سروری که خود فایل ازش سرو می‌شه وصل می‌شه. initData رو
+   از window.Bale.WebApp می‌خونه (فرض بر کپی بودن از Telegram
+   WebApp API)؛ اگه بله SDK متفاوتی داره یا اسم شیء JS فرق
+   می‌کنه، همین چند خط اول init() باید عوض بشه.
    ========================================================= */
+const API_BASE = ''; // همون دامنه‌ی فعلی؛ اگه جدا هاست شد، اینجا آدرس بک‌اند رو بذار
+let INIT_DATA = '';
+
+function getWebApp(){
+  // اول بله رو امتحان کن، بعد به‌عنوان fallback تلگرام (برای تست در مرورگر معمولی)
+  return (window.Bale && window.Bale.WebApp) || (window.Telegram && window.Telegram.WebApp) || null;
+}
+
+async function apiInit(){
+  const wa = getWebApp();
+  if(wa){
+    INIT_DATA = wa.initData || '';
+    wa.ready && wa.ready();
+    wa.expand && wa.expand();
+  } else {
+    // خارج از بله باز شده (مثلاً برای تست توی مرورگر) — initData خالیه
+    // و سرور با 401 جواب می‌ده. اجازه بده مینی‌اپ حداقل رندر بشه.
+    console.warn('WebApp bridge پیدا نشد؛ در حالت آفلاین/دمو اجرا می‌شه.');
+    return;
+  }
+  try{
+    const res = await fetch(API_BASE+'/api/init', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ initData: INIT_DATA })
+    });
+    const data = await res.json();
+    if(data.ok){
+      state.user.name = data.user.first_name || 'بازیکن';
+      state.best = data.best_scores || {};
+      state.unlocked = new Set(data.unlocked_achievements || []);
+      // XP/سطح رو از overall_score تخمین اولیه بزن (اختیاری)
+    } else {
+      console.warn('init failed:', data.error);
+    }
+  } catch(e){
+    console.warn('API init error:', e);
+  }
+  renderHud();
+  if(state.screen==='home') go('home');
+}
+
+async function apiSubmit(test_type, score, correct, total, duration_ms){
+  if(!INIT_DATA) return null; // حالت آفلاین/دمو، چیزی به سرور نمی‌فرسته
+  try{
+    const res = await fetch(API_BASE+'/api/submit', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ initData: INIT_DATA, test_type, score, correct, total, duration_ms })
+    });
+    const data = await res.json();
+    return data.ok ? data.result : null;
+  } catch(e){
+    console.warn('API submit error:', e);
+    return null;
+  }
+}
 
 const TESTS = {
   memory:    { title:'حافظه',        icon:'🧠', glow:'#8B5CF6', glow2:'rgba(139,92,246,.5)', glowsoft:'rgba(139,92,246,.35)', sub:'دنباله رنگ‌ها رو حفظ کن' },
@@ -502,17 +551,19 @@ function gameHead(title, total, current){
   </div>`;
 }
 
-function finishGame(key, score, correct, total, extraDetail, achChecks){
+function finishGame(key, score, correct, total, extraDetail, durationMs){
   state.sessionStreak++;
   if(state.sessionStreak>=5) unlock('combo5');
   if(state.best[key]===undefined || score>state.best[key]) state.best[key]=score;
   if(score>=100) unlock('perfect');
   if(state.unlocked.size===0 || !state.unlocked.has('first')) unlock('first');
-  if(achChecks) achChecks();
 
   const xpGain = Math.round(score/2)+10;
   const coinGain = Math.round(score/10)+1;
   addXp(xpGain); state.coins+=coinGain; renderHud();
+
+  // ثبت واقعی روی سرور بله (پس‌زمینه، منتظرش نمی‌مونیم تا بازی روون بمونه)
+  apiSubmit(key, score, correct, total, durationMs||0);
 
   go('result', { key, score, xp:xpGain, coins:coinGain, detail: extraDetail || `${correct}/${total}` });
 }
@@ -625,7 +676,7 @@ function reactTap(){
     else if(ms<=1000){score=60; label='خوب';}
     else {score=40; label='کند';}
     if(ms<=300) unlock('fast');
-    finishGame('reaction', score, 1, 1, `${ms}ms · ${label}`);
+    finishGame('reaction', score, 1, 1, `${ms}ms · ${label}`, ms);
   }
 }
 
@@ -742,6 +793,7 @@ function genLogic(){
 /* ---------- INIT ---------- */
 renderHud();
 go('home');
+apiInit();
 </script>
 </body>
 </html>
