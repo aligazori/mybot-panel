@@ -1,799 +1,496 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="fa" dir="rtl" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>آزمایشگاه ذهن</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<title>یادآور | مینی‌اپ یادآوری‌ها</title>
+<meta name="description" content="یادآور، مینی‌اپ تلگرام برای ثبت و مدیریت یادآوری‌های روزانه با تکرار، اولویت و آمار لحظه‌ای." />
+<meta name="theme-color" content="#0b0b16" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" />
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  :root{
-    --void:#0A0B14;
-    --void-2:#12142A;
-    --panel:#161832;
-    --panel-line:#2A2C52;
-    --violet:#8B5CF6;
-    --violet-glow:rgba(139,92,246,.55);
-    --cyan:#22D3EE;
-    --cyan-glow:rgba(34,211,238,.5);
-    --amber:#FBBF24;
-    --amber-glow:rgba(251,191,36,.5);
-    --rose:#FB7185;
-    --rose-glow:rgba(251,113,133,.5);
-    --green:#34D399;
-    --red:#F87171;
-    --ink:#F1F0FF;
-    --ink-dim:#9997BE;
-    --radius:22px;
-  }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{height:100%;}
-  body{
-    margin:0;
-    background:var(--void);
-    color:var(--ink);
-    font-family:'Vazirmatn', sans-serif;
-    overflow:hidden;
-    display:flex;
-    justify-content:center;
-    align-items:stretch;
-  }
-  #frame{
-    width:100%;
-    max-width:460px;
-    height:100vh;
-    height:100dvh;
-    position:relative;
-    display:flex;
-    flex-direction:column;
-    background:
-      radial-gradient(60% 40% at 15% -5%, rgba(139,92,246,.28), transparent 60%),
-      radial-gradient(50% 35% at 100% 0%, rgba(34,211,238,.16), transparent 60%),
-      var(--void);
-    overflow:hidden;
-  }
-  #frame::before{
-    content:"";
-    position:absolute; inset:0;
-    background-image:
-      radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,.35), transparent),
-      radial-gradient(2px 2px at 70% 65%, rgba(255,255,255,.25), transparent),
-      radial-gradient(1.5px 1.5px at 40% 80%, rgba(255,255,255,.3), transparent),
-      radial-gradient(1.5px 1.5px at 85% 20%, rgba(255,255,255,.25), transparent),
-      radial-gradient(1.5px 1.5px at 55% 45%, rgba(255,255,255,.2), transparent);
-    animation: drift 14s linear infinite;
-    opacity:.6;
-    pointer-events:none;
-  }
-  @keyframes drift{
-    0%{ transform:translateY(0); }
-    100%{ transform:translateY(-24px); }
-  }
-
-  /* ===== HUD ===== */
-  #hud{
-    position:relative;
-    display:flex; align-items:center; gap:10px;
-    padding:14px 16px 10px;
-    z-index:5;
-  }
-  .level-badge{
-    width:44px; height:44px; border-radius:14px;
-    background:linear-gradient(155deg, var(--violet), #5B21B6);
-    display:flex; align-items:center; justify-content:center;
-    font-weight:900; font-size:17px;
-    box-shadow:0 0 18px var(--violet-glow), inset 0 1px 0 rgba(255,255,255,.25);
-    flex-shrink:0;
-  }
-  .hud-mid{flex:1; min-width:0;}
-  .xp-row{display:flex; justify-content:space-between; font-size:11px; color:var(--ink-dim); margin-bottom:4px;}
-  .xp-track{
-    height:8px; border-radius:99px; background:#1E2044;
-    overflow:hidden; border:1px solid var(--panel-line);
-  }
-  .xp-fill{
-    height:100%; border-radius:99px;
-    background:linear-gradient(90deg, var(--cyan), var(--violet));
-    box-shadow:0 0 10px var(--cyan-glow);
-    transition:width .6s cubic-bezier(.2,.9,.3,1);
-  }
-  .coin-pill{
-    display:flex; align-items:center; gap:6px;
-    background:var(--panel); border:1px solid var(--panel-line);
-    padding:7px 12px; border-radius:99px;
-    font-weight:700; font-size:13px; flex-shrink:0;
-  }
-  .coin-dot{width:8px;height:8px;border-radius:50%;background:var(--amber); box-shadow:0 0 8px var(--amber-glow);}
-
-  /* ===== SCREENS ===== */
-  #stage{
-    position:relative; flex:1; overflow-y:auto; overflow-x:hidden;
-    padding:6px 18px 24px; z-index:2;
-  }
-  #stage::-webkit-scrollbar{display:none;}
-
-  .hero{ padding:14px 2px 22px; }
-  .hero h1{
-    margin:0 0 6px; font-size:30px; font-weight:900; line-height:1.15;
-    background:linear-gradient(90deg, #fff, #C9C3FF);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-  }
-  .hero p{margin:0; color:var(--ink-dim); font-size:14.5px; font-weight:500;}
-
-  .grid{
-    display:grid; grid-template-columns:1fr 1fr; gap:12px;
-  }
-  .tile{
-    position:relative;
-    border-radius:var(--radius);
-    padding:16px 14px 14px;
-    background:linear-gradient(160deg, var(--panel), #101228);
-    border:1px solid var(--panel-line);
-    cursor:pointer;
-    transition:transform .12s ease;
-    overflow:hidden;
-  }
-  .tile:active{ transform:scale(.95); }
-  .tile::after{
-    content:""; position:absolute; inset:-1px; border-radius:inherit;
-    padding:1px; opacity:.9;
-    background:linear-gradient(160deg, var(--glow,#3a3d6e), transparent 60%);
-    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor; mask-composite: exclude;
-    pointer-events:none;
-  }
-  .tile-icon{
-    width:42px; height:42px; border-radius:13px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:21px; margin-bottom:10px;
-    background:radial-gradient(circle at 30% 30%, var(--glow2,#333), transparent 70%), rgba(255,255,255,.04);
-    box-shadow:0 0 16px var(--glowsoft, transparent);
-  }
-  .tile-title{font-weight:800; font-size:15px; margin-bottom:3px;}
-  .tile-sub{font-size:11.5px; color:var(--ink-dim); font-weight:500;}
-
-  .row-links{ display:flex; gap:10px; margin-top:16px; }
-  .link-card{
-    flex:1; text-align:center; padding:13px 6px;
-    border-radius:16px; background:var(--panel); border:1px solid var(--panel-line);
-    font-size:12.5px; font-weight:700; color:var(--ink-dim);
-    cursor:pointer;
-  }
-  .link-card:active{ transform:scale(.96); }
-  .link-card b{display:block; font-size:17px; color:var(--ink); margin-bottom:2px; font-weight:900;}
-
-  /* ===== GAME SCREEN ===== */
-  .game-head{
-    display:flex; align-items:center; justify-content:space-between; padding:10px 2px 4px;
-  }
-  .back-btn{
-    width:36px; height:36px; border-radius:11px; background:var(--panel);
-    border:1px solid var(--panel-line); display:flex; align-items:center; justify-content:center;
-    font-size:16px; cursor:pointer; color:var(--ink);
-  }
-  .game-title{font-weight:800; font-size:15px;}
-  .progress-dots{display:flex; gap:5px;}
-  .dot{width:7px; height:7px; border-radius:50%; background:#2A2C52;}
-  .dot.done{background:var(--green); box-shadow:0 0 6px var(--green);}
-  .dot.now{background:var(--cyan); box-shadow:0 0 8px var(--cyan);}
-
-  .center-stage{
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    min-height:56vh; text-align:center; gap:18px; padding:10px 0;
-  }
-  .prompt-text{font-size:20px; font-weight:800; line-height:1.5; white-space:pre-line;}
-  .sub-text{color:var(--ink-dim); font-size:13.5px; font-weight:500;}
-
-  .opt-list{ display:flex; flex-direction:column; gap:10px; width:100%; margin-top:8px; }
-  .opt-btn{
-    width:100%; padding:15px 16px; border-radius:16px; text-align:center;
-    background:var(--panel); border:1.5px solid var(--panel-line); color:var(--ink);
-    font-family:inherit; font-size:15.5px; font-weight:700; cursor:pointer;
-  }
-  .opt-btn:active{ transform:scale(.97); }
-  .opt-btn.correct{ background:rgba(52,211,153,.18); border-color:var(--green); color:var(--green); }
-  .opt-btn.wrong{ background:rgba(248,113,113,.18); border-color:var(--red); color:var(--red); }
-
-  .ring-wrap{ position:relative; width:74px; height:74px; }
-  .ring-wrap svg{ transform:rotate(-90deg); }
-  .ring-bg{ fill:none; stroke:#22244A; stroke-width:6; }
-  .ring-fg{ fill:none; stroke:var(--amber); stroke-width:6; stroke-linecap:round; filter:drop-shadow(0 0 6px var(--amber-glow)); transition:stroke-dashoffset .1s linear; }
-  .ring-num{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; }
-
-  /* Simon memory grid */
-  .simon-grid{
-    display:grid; grid-template-columns:1fr 1fr; gap:14px;
-    width:230px; height:230px;
-  }
-  .pad{
-    border-radius:20px; opacity:.35; cursor:pointer; transition:opacity .12s, transform .12s;
-    border:1px solid rgba(255,255,255,.08);
-  }
-  .pad:active{ transform:scale(.94); }
-  .pad.lit{ opacity:1; }
-  .pad-0{ background:var(--violet); box-shadow:0 0 0 var(--violet-glow); }
-  .pad-1{ background:var(--cyan); }
-  .pad-2{ background:var(--amber); }
-  .pad-3{ background:var(--rose); }
-  .pad-0.lit{ box-shadow:0 0 30px var(--violet-glow); }
-  .pad-1.lit{ box-shadow:0 0 30px var(--cyan-glow); }
-  .pad-2.lit{ box-shadow:0 0 30px var(--amber-glow); }
-  .pad-3.lit{ box-shadow:0 0 30px var(--rose-glow); }
-
-  .round-badge{
-    font-size:13px; font-weight:800; color:var(--ink-dim);
-    background:var(--panel); border:1px solid var(--panel-line);
-    padding:6px 14px; border-radius:99px;
-  }
-
-  /* Reaction */
-  .react-field{
-    width:100%; height:56vh; border-radius:24px; position:relative;
-    background:var(--panel); border:1.5px solid var(--panel-line);
-    display:flex; align-items:center; justify-content:center;
-    overflow:hidden; cursor:pointer; user-select:none;
-  }
-  .react-field.wait{ background:linear-gradient(160deg,#1c1440,#120f2a); }
-  .react-field.go{ background:linear-gradient(160deg,#0e3a2c,#0a2419); }
-  .react-field.early{ background:linear-gradient(160deg,#3a1414,#240b0b); }
-  .react-msg{ font-size:22px; font-weight:900; }
-
-  /* Attention grid */
-  .letter-grid{
-    display:flex; flex-wrap:wrap; gap:10px; justify-content:center;
-    max-width:280px; font-size:24px; font-weight:800; letter-spacing:2px;
-  }
-  .letter-grid span{ color:var(--ink); }
-
-  /* Result screen */
-  .stars{ display:flex; gap:8px; justify-content:center; margin:8px 0 4px; }
-  .star{ font-size:34px; filter:grayscale(1) opacity(.3); }
-  .star.on{ filter:none; text-shadow:0 0 16px var(--amber-glow); animation:pop .35s ease; }
-  @keyframes pop{ 0%{transform:scale(0);} 70%{transform:scale(1.25);} 100%{transform:scale(1);} }
-  .score-big{ font-size:52px; font-weight:900; margin:6px 0 0; }
-  .score-cap{ color:var(--ink-dim); font-size:13px; font-weight:600; }
-  .stat-row{ display:flex; gap:10px; width:100%; margin:18px 0; }
-  .stat-card{
-    flex:1; background:var(--panel); border:1px solid var(--panel-line);
-    border-radius:16px; padding:12px; text-align:center;
-  }
-  .stat-card b{ display:block; font-size:19px; font-weight:900; }
-  .stat-card span{ font-size:11px; color:var(--ink-dim); font-weight:600; }
-
-  .btn{
-    width:100%; padding:16px; border:none; border-radius:16px;
-    font-family:inherit; font-weight:800; font-size:15.5px; cursor:pointer;
-    color:#0A0B14;
-  }
-  .btn:active{ transform:scale(.97); }
-  .btn-primary{ background:linear-gradient(90deg, var(--cyan), var(--violet)); color:#fff; box-shadow:0 6px 22px rgba(139,92,246,.35); }
-  .btn-ghost{ background:var(--panel); color:var(--ink); border:1px solid var(--panel-line); margin-top:10px; }
-
-  /* Achievements */
-  .ach-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px; }
-  .ach{
-    padding:14px; border-radius:16px; background:var(--panel); border:1px solid var(--panel-line);
-    text-align:center; opacity:.4;
-  }
-  .ach.unlocked{ opacity:1; border-color:var(--amber); box-shadow:0 0 16px rgba(251,191,36,.18); }
-  .ach-icon{ font-size:26px; margin-bottom:6px; }
-  .ach-name{ font-weight:800; font-size:12.5px; }
-  .ach-desc{ font-size:10.5px; color:var(--ink-dim); margin-top:2px; }
-
-  /* Leaderboard */
-  .podium{ display:flex; align-items:flex-end; gap:10px; justify-content:center; margin:16px 0 22px; }
-  .pod-col{ text-align:center; }
-  .pod-avatar{ width:46px; height:46px; border-radius:50%; margin:0 auto 6px; display:flex; align-items:center; justify-content:center; font-size:20px; }
-  .pod-bar{ width:64px; border-radius:12px 12px 0 0; display:flex; align-items:flex-start; justify-content:center; padding-top:6px; font-weight:900; }
-  .pod-name{ font-size:11px; margin-top:6px; color:var(--ink-dim); font-weight:700; }
-  .lb-row{
-    display:flex; align-items:center; gap:10px; padding:11px 14px;
-    background:var(--panel); border:1px solid var(--panel-line); border-radius:14px; margin-bottom:8px;
-  }
-  .lb-rank{ width:22px; text-align:center; font-weight:800; color:var(--ink-dim); }
-  .lb-name{ flex:1; font-weight:700; font-size:13.5px; }
-  .lb-score{ font-weight:900; color:var(--cyan); font-size:13.5px; }
-  .note-box{
-    background:rgba(139,92,246,.1); border:1px dashed var(--panel-line);
-    border-radius:14px; padding:12px 14px; font-size:12px; color:var(--ink-dim); margin-bottom:14px; line-height:1.7;
-  }
-
-  .toast{
-    position:absolute; top:16px; left:50%; transform:translateX(-50%) translateY(-60px);
-    background:var(--panel); border:1px solid var(--panel-line); padding:10px 18px;
-    border-radius:99px; font-weight:800; font-size:13px; z-index:50;
-    transition:transform .3s cubic-bezier(.2,.9,.3,1); box-shadow:0 8px 24px rgba(0,0,0,.4);
-  }
-  .toast.show{ transform:translateX(-50%) translateY(0); }
-
-  .shake{ animation:shake .3s; }
-  @keyframes shake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+:root{
+  --bg:#0a0a14; --bg2:#12102a;
+  --glass:rgba(255,255,255,.06);
+  --glass-brd:rgba(255,255,255,.12);
+  --txt:#f2f3fb; --muted:#a5a7c4;
+  --p1:#7c5cff; --p2:#3aa0ff; --ok:#2fd39a; --warn:#ffb020; --bad:#ff5d6c;
+  --shadow:0 18px 40px -18px rgba(0,0,0,.75);
+  --r:22px;
+}
+html[data-theme="light"]{
+  --bg:#f4f5fb; --bg2:#e9e9ff;
+  --glass:rgba(255,255,255,.72);
+  --glass-brd:rgba(20,20,60,.09);
+  --txt:#161734; --muted:#5d6084;
+  --shadow:0 18px 40px -22px rgba(40,40,90,.35);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden}
+body{
+  font-family:Vazirmatn,system-ui,sans-serif;
+  background:
+    radial-gradient(900px 500px at 85% -10%,rgba(124,92,255,.35),transparent 60%),
+    radial-gradient(700px 500px at 0% 10%,rgba(58,160,255,.28),transparent 60%),
+    linear-gradient(180deg,var(--bg),var(--bg2));
+  background-attachment:fixed;
+  color:var(--txt); min-height:100vh;
+  padding:calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 120px);
+  transition:background .35s ease,color .25s ease;
+}
+.glass{background:var(--glass);border:1px solid var(--glass-brd);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:var(--shadow);border-radius:var(--r)}
+.wrap{max-width:520px;margin:0 auto}
+header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.logo{width:46px;height:46px;border-radius:16px;display:grid;place-items:center;font-size:22px;background:linear-gradient(140deg,var(--p1),var(--p2));box-shadow:0 10px 24px -10px var(--p1)}
+h1{font-size:19px;margin:0;font-weight:800}
+.sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.hbtns{margin-inline-start:auto;display:flex;gap:8px}
+.icon-btn{width:44px;height:44px;border-radius:14px;border:1px solid var(--glass-brd);background:var(--glass);color:var(--txt);font-size:17px;cursor:pointer;transition:transform .15s,background .2s}
+.icon-btn:active{transform:scale(.92)}
+.hero{padding:18px;margin-bottom:14px;position:relative;overflow:hidden}
+.hero h2{margin:0 0 6px;font-size:17px}
+.hero p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.9}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.stat{padding:14px 8px;text-align:center}
+.stat b{display:block;font-size:22px;background:linear-gradient(120deg,var(--p1),var(--p2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat span{font-size:11px;color:var(--muted)}
+.rowhead{display:flex;align-items:center;justify-content:space-between;margin:0 4px 10px}
+.rowhead h3{font-size:14.5px;margin:0}
+.filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.chip{white-space:nowrap;padding:9px 16px;min-height:40px;border-radius:999px;border:1px solid var(--glass-brd);background:var(--glass);color:var(--muted);font:inherit;font-size:12.5px;cursor:pointer;transition:.2s}
+.chip.on{color:#fff;background:linear-gradient(120deg,var(--p1),var(--p2));border-color:transparent}
+.list{display:flex;flex-direction:column;gap:12px}
+.card{padding:15px;animation:in .32s ease both}
+@keyframes in{from{opacity:0;transform:translateY(10px)}}
+.card .top{display:flex;align-items:flex-start;gap:10px}
+.card h4{margin:0;font-size:14.5px;flex:1;line-height:1.7}
+.card.done h4{text-decoration:line-through;opacity:.55}
+.desc{margin:8px 0 0;font-size:12px;color:var(--muted);line-height:1.9}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
+.tag{font-size:11px;padding:5px 10px;border-radius:10px;background:rgba(125,125,190,.14);color:var(--muted)}
+.pri{font-size:10.5px;padding:5px 10px;border-radius:10px;font-weight:700}
+.pri.normal{background:rgba(58,160,255,.16);color:#5ab0ff}
+.pri.high{background:rgba(255,176,32,.16);color:#ffb020}
+.pri.urgent{background:rgba(255,93,108,.16);color:#ff7683}
+.acts{display:flex;gap:8px;margin-top:13px}
+.btn{flex:1;min-height:44px;border-radius:14px;border:1px solid var(--glass-brd);background:var(--glass);color:var(--txt);font:inherit;font-size:12.5px;cursor:pointer;transition:transform .14s,opacity .2s}
+.btn:active{transform:scale(.96)}
+.btn.prim{border:none;color:#fff;background:linear-gradient(120deg,var(--p1),var(--p2));box-shadow:0 12px 26px -14px var(--p1)}
+.btn.ok{border:none;color:#04241a;background:linear-gradient(120deg,#48e2ae,var(--ok))}
+.btn.danger{color:var(--bad)}
+.card.attention{border-color:rgba(255,176,32,.5);background:linear-gradient(150deg,rgba(255,176,32,.14),var(--glass));animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 4px rgba(255,176,32,.10)}}
+.attn-bar{font-size:12px;font-weight:700;color:var(--warn);margin-bottom:10px}
+.empty{text-align:center;padding:44px 20px}
+.empty .e{font-size:40px}
+.empty p{color:var(--muted);font-size:12.5px;margin:10px 0 0;line-height:2}
+.fab{position:fixed;inset-inline:0;bottom:calc(env(safe-area-inset-bottom) + 16px);margin:0 auto;width:min(488px,calc(100% - 32px));min-height:56px;border:none;border-radius:20px;color:#fff;font:inherit;font-size:15px;font-weight:700;cursor:pointer;background:linear-gradient(120deg,var(--p1),var(--p2));box-shadow:0 18px 40px -14px var(--p1);transition:transform .16s;z-index:40}
+.fab:active{transform:scale(.97)}
+.ov{position:fixed;inset:0;background:rgba(4,4,14,.6);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:.25s;z-index:60}
+.ov.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;inset-inline:0;bottom:0;z-index:70;transform:translateY(101%);transition:transform .34s cubic-bezier(.22,1,.36,1);max-height:92vh;overflow-y:auto;border-radius:26px 26px 0 0;padding:10px 18px calc(env(safe-area-inset-bottom) + 20px);background:var(--glass);border:1px solid var(--glass-brd);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+html[data-theme="dark"] .sheet{background:rgba(18,16,42,.92)}
+html[data-theme="light"] .sheet{background:rgba(255,255,255,.96)}
+.sheet.on{transform:translateY(0)}
+.grab{width:44px;height:4px;border-radius:9px;background:var(--glass-brd);margin:6px auto 14px}
+.sheet h3{margin:0 0 14px;font-size:16px}
+label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
+.f{margin-bottom:13px}
+input,textarea,select{width:100%;min-height:46px;padding:11px 13px;border-radius:14px;border:1px solid var(--glass-brd);background:rgba(125,125,190,.10);color:var(--txt);font:inherit;font-size:13px;outline:none;transition:border .2s}
+textarea{min-height:74px;resize:vertical}
+input:focus,textarea:focus,select:focus{border-color:var(--p1)}
+select option{color:#111}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.err{color:var(--bad);font-size:11px;margin-top:5px;display:none}
+.err.on{display:block}
+.snooze{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.toast{position:fixed;top:calc(env(safe-area-inset-top) + 14px);inset-inline:0;margin:0 auto;width:max-content;max-width:88%;padding:12px 18px;border-radius:16px;font-size:12.5px;color:#fff;z-index:90;opacity:0;transform:translateY(-16px);transition:.28s;pointer-events:none}
+.toast.on{opacity:1;transform:translateY(0)}
+.toast.s{background:linear-gradient(120deg,#25b98a,var(--ok))}
+.toast.e{background:linear-gradient(120deg,#e0455a,var(--bad))}
+.toast.i{background:linear-gradient(120deg,var(--p1),var(--p2))}
 </style>
 </head>
 <body>
-<div id="frame">
-  <div id="hud"></div>
-  <div id="stage"></div>
-  <div class="toast" id="toast"></div>
+<div class="wrap">
+  <header>
+    <div class="logo">⏰</div>
+    <div>
+      <h1>یادآور</h1>
+      <div class="sub">هیچ کاری را دیگر فراموش نکن</div>
+    </div>
+    <div class="hbtns">
+      <button class="icon-btn" id="themeBtn" aria-label="تغییر پوسته">🌙</button>
+      <button class="icon-btn" id="settingsBtn" aria-label="تنظیمات">⚙️</button>
+    </div>
+  </header>
+
+  <section class="glass hero">
+    <h2 id="hello">سلام 👋</h2>
+    <p id="heroSub">یادآوری‌های امروزت اینجاست.</p>
+  </section>
+
+  <section class="stats">
+    <div class="glass stat"><b id="sToday">۰</b><span>امروز</span></div>
+    <div class="glass stat"><b id="sPending">۰</b><span>در انتظار</span></div>
+    <div class="glass stat"><b id="sDone">۰</b><span>انجام‌شده</span></div>
+  </section>
+
+  <div class="rowhead"><h3>یادآوری‌های نزدیک</h3><span class="sub" id="count"></span></div>
+
+  <div class="filters" id="filters">
+    <button class="chip on" data-f="all">همه</button>
+    <button class="chip" data-f="today">امروز</button>
+    <button class="chip" data-f="active">فعال</button>
+    <button class="chip" data-f="completed">انجام‌شده</button>
+  </div>
+
+  <div class="list" id="list"></div>
 </div>
 
+<button class="fab" id="fab">＋ یادآوری جدید</button>
+
+<div class="ov" id="ov"></div>
+
+<!-- form sheet -->
+<div class="sheet" id="sheet" role="dialog" aria-modal="true">
+  <div class="grab"></div>
+  <h3 id="sheetTitle">یادآوری جدید</h3>
+  <form id="form" novalidate>
+    <div class="f"><label for="title">عنوان</label><input id="title" maxlength="80" placeholder="مثلاً تماس با مشتری" /><div class="err" id="eTitle">عنوان را وارد کنید.</div></div>
+    <div class="f"><label for="desc">توضیحات (اختیاری)</label><textarea id="desc" maxlength="300" placeholder="جزئیات بیشتر…"></textarea></div>
+    <div class="two">
+      <div class="f"><label for="date">تاریخ</label><input id="date" type="date" /><div class="err" id="eDate">تاریخ معتبر نیست.</div></div>
+      <div class="f"><label for="time">ساعت</label><input id="time" type="time" /><div class="err" id="eTime">ساعت معتبر نیست.</div></div>
+    </div>
+    <div class="err" id="ePast" style="margin:-6px 0 12px">زمان انتخاب‌شده گذشته است.</div>
+    <div class="two">
+      <div class="f"><label for="repeat">تکرار</label>
+        <select id="repeat">
+          <option value="none">بدون تکرار</option><option value="daily">هر روز</option>
+          <option value="weekly">هر هفته</option><option value="monthly">هر ماه</option><option value="yearly">هر سال</option>
+        </select></div>
+      <div class="f"><label for="priority">اولویت</label>
+        <select id="priority"><option value="normal">عادی</option><option value="high">مهم</option><option value="urgent">خیلی مهم</option></select></div>
+    </div>
+    <div class="acts" style="margin-top:4px">
+      <button type="button" class="btn" id="cancelBtn">انصراف</button>
+      <button type="submit" class="btn prim">ذخیره یادآوری</button>
+    </div>
+  </form>
+</div>
+
+<!-- snooze sheet -->
+<div class="sheet" id="snoozeSheet" role="dialog" aria-modal="true">
+  <div class="grab"></div>
+  <h3>یادآوری برای چه زمانی؟</h3>
+  <div class="snooze">
+    <button class="btn" data-sn="10">۱۰ دقیقه</button>
+    <button class="btn" data-sn="30">۳۰ دقیقه</button>
+    <button class="btn" data-sn="60">۱ ساعت</button>
+    <button class="btn" data-sn="tomorrow">فردا</button>
+  </div>
+  <button class="btn" id="snCancel">انصراف</button>
+</div>
+
+<!-- confirm sheet -->
+<div class="sheet" id="confirmSheet" role="dialog" aria-modal="true">
+  <div class="grab"></div>
+  <h3>حذف یادآوری</h3>
+  <p class="desc" id="confirmText">مطمئنی می‌خواهی این یادآوری حذف شود؟</p>
+  <div class="acts" style="margin-top:16px">
+    <button class="btn" id="cfNo">انصراف</button>
+    <button class="btn danger" id="cfYes">بله، حذف کن</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-/* =========================================================
-   آزمایشگاه ذهن — Mini App (وصل‌شده به بک‌اند بله)
-   -----------------------------------------------------------
-   این نسخه به /api/init و /api/submit و /api/leaderboard روی
-   همون سروری که خود فایل ازش سرو می‌شه وصل می‌شه. initData رو
-   از window.Bale.WebApp می‌خونه (فرض بر کپی بودن از Telegram
-   WebApp API)؛ اگه بله SDK متفاوتی داره یا اسم شیء JS فرق
-   می‌کنه، همین چند خط اول init() باید عوض بشه.
-   ========================================================= */
-const API_BASE = ''; // همون دامنه‌ی فعلی؛ اگه جدا هاست شد، اینجا آدرس بک‌اند رو بذار
-let INIT_DATA = '';
+(function () {
+  "use strict";
 
-function getWebApp(){
-  // اول بله رو امتحان کن، بعد به‌عنوان fallback تلگرام (برای تست در مرورگر معمولی)
-  return (window.Bale && window.Bale.WebApp) || (window.Telegram && window.Telegram.WebApp) || null;
-}
-
-async function apiInit(){
-  const wa = getWebApp();
-  if(wa){
-    INIT_DATA = wa.initData || '';
-    wa.ready && wa.ready();
-    wa.expand && wa.expand();
-  } else {
-    // خارج از بله باز شده (مثلاً برای تست توی مرورگر) — initData خالیه
-    // و سرور با 401 جواب می‌ده. اجازه بده مینی‌اپ حداقل رندر بشه.
-    console.warn('WebApp bridge پیدا نشد؛ در حالت آفلاین/دمو اجرا می‌شه.');
-    return;
+  /* ---------- Telegram bridge (safe on plain browsers) ---------- */
+  var tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+  function haptic(type, kind) {
+    try {
+      if (!tg || !tg.HapticFeedback) return;
+      if (type === "notification") tg.HapticFeedback.notificationOccurred(kind);
+      else tg.HapticFeedback.impactOccurred(kind || "light");
+    } catch (e) {}
   }
-  try{
-    const res = await fetch(API_BASE+'/api/init', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ initData: INIT_DATA })
+  function hapticSuccess() { haptic("notification", "success"); }
+  function hapticWarning() { haptic("notification", "warning"); }
+  function hapticError() { haptic("notification", "error"); }
+  function hapticTap() { haptic("impact", "light"); }
+  function sendToTelegram(payload) {           // ready for future bot backend
+    try { if (tg && tg.sendData) tg.sendData(JSON.stringify(payload)); return true; } catch (e) { return false; }
+  }
+  function closeMiniApp() { try { if (tg && tg.close) tg.close(); } catch (e) {} }
+  if (tg) { try { tg.ready(); tg.expand(); } catch (e) {} }
+
+  /* ---------- state ---------- */
+  var KEY = "yadavar.reminders.v1", TKEY = "yadavar.theme";
+  var state = { reminders: [], filter: "all", editingId: null, snoozeId: null, deleteId: null };
+  var fa = function (n) { return String(n).replace(/\d/g, function (d) { return "۰۱۲۳۴۵۶۷۸۹"[d]; }); };
+
+  function loadData() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      var arr = raw ? JSON.parse(raw) : [];
+      state.reminders = Array.isArray(arr) ? arr.filter(function (r) { return r && r.id && r.title; }) : [];
+    } catch (e) { state.reminders = []; }
+  }
+  function saveData() {
+    try { localStorage.setItem(KEY, JSON.stringify(state.reminders)); return true; }
+    catch (e) { toast("ذخیره‌سازی ناموفق بود", "e"); return false; }
+  }
+
+  function uid() { return "r_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function tsOf(r) { var t = new Date(r.date + "T" + r.time).getTime(); return isNaN(t) ? Infinity : t; }
+
+  /* ---------- CRUD ---------- */
+  function createReminder(data) {
+    var r = {
+      id: uid(), title: data.title, description: data.description || "",
+      date: data.date, time: data.time, repeat: data.repeat, priority: data.priority,
+      status: "pending", createdAt: Date.now(), snoozedFrom: null
+    };
+    state.reminders.push(r); saveData(); return r;
+  }
+  function updateReminder(id, patch) {
+    var r = findR(id); if (!r) return null;
+    Object.keys(patch).forEach(function (k) { r[k] = patch[k]; });
+    saveData(); return r;
+  }
+  function deleteReminder(id) {
+    state.reminders = state.reminders.filter(function (r) { return r.id !== id; });
+    saveData();
+  }
+  function completeReminder(id) {
+    var r = findR(id); if (!r) return;
+    if (r.status === "completed") { r.status = "pending"; toast("به حالت فعال برگشت", "i"); }
+    else { r.status = "completed"; r.completedAt = Date.now(); toast("انجام شد ✅", "s"); hapticSuccess(); }
+    saveData(); renderReminders(); updateStats();
+  }
+  function snoozeReminder(id, option) {
+    var r = findR(id); if (!r) return;
+    var base = new Date();
+    if (option === "tomorrow") { base.setDate(base.getDate() + 1); }
+    else { base = new Date(Date.now() + parseInt(option, 10) * 60000); }
+    r.date = ymd(base); r.time = hm(base); r.status = "pending"; r.snoozedFrom = Date.now();
+    saveData(); renderReminders(); updateStats();
+    toast("به بعد موکول شد ⏰", "i"); hapticWarning();
+  }
+  function findR(id) { for (var i = 0; i < state.reminders.length; i++) if (state.reminders[i].id === id) return state.reminders[i]; return null; }
+
+  function ymd(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function hm(d) { return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+
+  function needsResponse(r) { return r.status === "pending" && tsOf(r) <= Date.now(); }
+  function isToday(r) { return r.date === ymd(new Date()); }
+
+  /* ---------- rendering ---------- */
+  var REPEAT = { none: "بدون تکرار", daily: "هر روز", weekly: "هر هفته", monthly: "هر ماه", yearly: "هر سال" };
+  var PRI = { normal: "عادی", high: "مهم", urgent: "خیلی مهم" };
+  var listEl = document.getElementById("list");
+
+  function faDate(s) {
+    var p = String(s).split("-"); if (p.length !== 3) return s;
+    try {
+      return new Intl.DateTimeFormat("fa-IR", { year: "numeric", month: "long", day: "numeric" })
+        .format(new Date(+p[0], +p[1] - 1, +p[2]));
+    } catch (e) { return fa(s); }
+  }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  function visible() {
+    var out = state.reminders.slice().sort(function (a, b) {
+      if ((a.status === "completed") !== (b.status === "completed")) return a.status === "completed" ? 1 : -1;
+      return tsOf(a) - tsOf(b);
     });
-    const data = await res.json();
-    if(data.ok){
-      state.user.name = data.user.first_name || 'بازیکن';
-      state.best = data.best_scores || {};
-      state.unlocked = new Set(data.unlocked_achievements || []);
-      // XP/سطح رو از overall_score تخمین اولیه بزن (اختیاری)
-    } else {
-      console.warn('init failed:', data.error);
-    }
-  } catch(e){
-    console.warn('API init error:', e);
+    if (state.filter === "today") out = out.filter(isToday);
+    if (state.filter === "active") out = out.filter(function (r) { return r.status !== "completed"; });
+    if (state.filter === "completed") out = out.filter(function (r) { return r.status === "completed"; });
+    return out;
   }
-  renderHud();
-  if(state.screen==='home') go('home');
-}
 
-async function apiSubmit(test_type, score, correct, total, duration_ms){
-  if(!INIT_DATA) return null; // حالت آفلاین/دمو، چیزی به سرور نمی‌فرسته
-  try{
-    const res = await fetch(API_BASE+'/api/submit', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ initData: INIT_DATA, test_type, score, correct, total, duration_ms })
+  function renderReminders() {
+    var items = visible();
+    document.getElementById("count").textContent = items.length ? fa(items.length) + " مورد" : "";
+    if (!items.length) {
+      listEl.innerHTML = '<div class="glass empty"><div class="e">🗂️</div><p>هنوز یادآوری‌ای در این بخش نیست.<br/>با دکمه پایین اولین یادآوری‌ات را بساز.</p></div>';
+      return;
+    }
+    listEl.innerHTML = items.map(function (r) {
+      var attn = needsResponse(r);
+      var acts = attn
+        ? '<div class="acts"><button class="btn ok" data-act="done" data-id="' + r.id + '">✅ انجام شد</button>' +
+          '<button class="btn" data-act="snooze" data-id="' + r.id + '">⏰ بعداً</button></div>'
+        : '<div class="acts"><button class="btn ok" data-act="done" data-id="' + r.id + '">' +
+          (r.status === "completed" ? "↩️ بازگردانی" : "✅ انجام شد") + '</button>' +
+          '<button class="btn" data-act="edit" data-id="' + r.id + '">✏️ ویرایش</button>' +
+          '<button class="btn danger" data-act="del" data-id="' + r.id + '">🗑 حذف</button></div>';
+      return '<article class="glass card ' + (attn ? "attention " : "") + (r.status === "completed" ? "done" : "") + '">' +
+        (attn ? '<div class="attn-bar">⚠️ نیازمند پاسخ شما</div>' : "") +
+        '<div class="top"><h4>' + esc(r.title) + '</h4><span class="pri ' + r.priority + '">' + PRI[r.priority] + '</span></div>' +
+        (r.description ? '<p class="desc">' + esc(r.description) + '</p>' : "") +
+        '<div class="meta">' +
+          '<span class="tag">📅 ' + faDate(r.date) + '</span>' +
+          '<span class="tag">🕒 ' + fa(r.time) + '</span>' +
+          '<span class="tag">🔁 ' + REPEAT[r.repeat] + '</span>' +
+          '<span class="tag">' + (r.status === "completed" ? "✅ انجام‌شده" : attn ? "⚠️ سررسید" : "⏳ در انتظار") + '</span>' +
+        '</div>' + acts + '</article>';
+    }).join("");
+  }
+
+  function updateStats() {
+    var today = 0, pending = 0, done = 0;
+    state.reminders.forEach(function (r) {
+      if (r.status === "completed") done++; else pending++;
+      if (isToday(r) && r.status !== "completed") today++;
     });
-    const data = await res.json();
-    return data.ok ? data.result : null;
-  } catch(e){
-    console.warn('API submit error:', e);
-    return null;
+    document.getElementById("sToday").textContent = fa(today);
+    document.getElementById("sPending").textContent = fa(pending);
+    document.getElementById("sDone").textContent = fa(done);
+    document.getElementById("heroSub").textContent = pending
+      ? "امروز " + fa(today) + " یادآوری و در مجموع " + fa(pending) + " مورد فعال داری."
+      : "همه‌چیز مرتب است؛ یادآوری فعالی نداری. 🎉";
   }
-}
 
-const TESTS = {
-  memory:    { title:'حافظه',        icon:'🧠', glow:'#8B5CF6', glow2:'rgba(139,92,246,.5)', glowsoft:'rgba(139,92,246,.35)', sub:'دنباله رنگ‌ها رو حفظ کن' },
-  reaction:  { title:'سرعت واکنش',   icon:'⚡', glow:'#22D3EE', glow2:'rgba(34,211,238,.5)', glowsoft:'rgba(34,211,238,.35)', sub:'به‌محض دیدن سبز بزن' },
-  math:      { title:'محاسبات ذهنی', icon:'🔢', glow:'#FBBF24', glow2:'rgba(251,191,36,.5)', glowsoft:'rgba(251,191,36,.35)', sub:'سریع و درست حساب کن' },
-  pattern:   { title:'تشخیص الگو',   icon:'🧩', glow:'#FB7185', glow2:'rgba(251,113,133,.5)', glowsoft:'rgba(251,113,133,.35)', sub:'عدد بعدی رو پیدا کن' },
-  attention: { title:'تمرکز',        icon:'🎯', glow:'#34D399', glow2:'rgba(52,211,153,.5)', glowsoft:'rgba(52,211,153,.35)', sub:'بین شلوغی، دقیق باش' },
-  logic:     { title:'منطق',         icon:'🧠', glow:'#818CF8', glow2:'rgba(129,140,248,.5)', glowsoft:'rgba(129,140,248,.35)', sub:'استدلال کن، جواب بده' },
-};
+  /* ---------- UI plumbing ---------- */
+  var ov = document.getElementById("ov"), sheet = document.getElementById("sheet"),
+      snoozeSheet = document.getElementById("snoozeSheet"), confirmSheet = document.getElementById("confirmSheet");
+  function openSheet(el) { ov.classList.add("on"); el.classList.add("on"); }
+  function closeSheets() { ov.classList.remove("on"); [sheet, snoozeSheet, confirmSheet].forEach(function (s) { s.classList.remove("on"); }); }
+  ov.addEventListener("click", closeSheets);
 
-const ACHIEVEMENTS = [
-  { code:'first',   icon:'🏅', name:'اولین آزمون',  desc:'یک بازی رو تموم کن' },
-  { code:'perfect',  icon:'💯', name:'بی‌نقص',       desc:'امتیاز کامل بگیر' },
-  { code:'fast',     icon:'⚡', name:'برق‌آسا',      desc:'واکنش زیر ۳۰۰ms' },
-  { code:'combo5',   icon:'🔥', name:'۵ بازی متوالی', desc:'۵ بار پشت‌سرهم بازی کن' },
-];
-
-const state = {
-  screen:'home',
-  xp:0, level:1, coins:0, sessionStreak:0,
-  best:{}, unlocked:new Set(),
-  user:{ name:'بازیکن' },
-};
-
-function xpNeeded(lvl){ return 100 + (lvl-1)*60; }
-
-function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  clearTimeout(toast._t);
-  toast._t=setTimeout(()=>t.classList.remove('show'), 1600);
-}
-
-function addXp(amount){
-  state.xp += amount;
-  while(state.xp >= xpNeeded(state.level)){
-    state.xp -= xpNeeded(state.level);
-    state.level += 1;
-    toast('🎉 رسیدی به سطح '+state.level);
+  var toastEl = document.getElementById("toast"), toastT;
+  function toast(msg, kind) {
+    toastEl.textContent = msg; toastEl.className = "toast on " + (kind || "i");
+    clearTimeout(toastT); toastT = setTimeout(function () { toastEl.classList.remove("on"); }, 2200);
   }
-  renderHud();
-}
 
-function unlock(code){
-  if(state.unlocked.has(code)) return;
-  state.unlocked.add(code);
-  const a = ACHIEVEMENTS.find(x=>x.code===code);
-  if(a) toast('🏆 دستاورد جدید: '+a.name);
-}
-
-function renderHud(){
-  const need = xpNeeded(state.level);
-  const pct = Math.min(100, Math.round(state.xp/need*100));
-  document.getElementById('hud').innerHTML = `
-    <div class="level-badge">${state.level}</div>
-    <div class="hud-mid">
-      <div class="xp-row"><span>سطح ${state.level}</span><span>${state.xp}/${need} XP</span></div>
-      <div class="xp-track"><div class="xp-fill" style="width:${pct}%"></div></div>
-    </div>
-    <div class="coin-pill"><span class="coin-dot"></span>${state.coins}</div>
-  `;
-}
-
-/* ---------- ROUTER ---------- */
-function go(screen, arg){
-  state.screen = screen;
-  const stage = document.getElementById('stage');
-  stage.innerHTML = SCREENS[screen](arg);
-  stage.scrollTop = 0;
-}
-
-/* ---------- HOME ---------- */
-function bestLabel(key){
-  const b = state.best[key];
-  return b!==undefined ? `بهترین: ${b}` : 'هنوز بازی نکردی';
-}
-
-const SCREENS = {
-  home(){
-    const tiles = Object.entries(TESTS).map(([key,t])=>`
-      <div class="tile" style="--glow:${t.glow};--glow2:${t.glow2};--glowsoft:${t.glowsoft}" onclick="startTest('${key}')">
-        <div class="tile-icon">${t.icon}</div>
-        <div class="tile-title">${t.title}</div>
-        <div class="tile-sub">${bestLabel(key)}</div>
-      </div>
-    `).join('');
-    return `
-      <div class="hero">
-        <h1>ذهنت رو به چالش بکش</h1>
-        <p>شش بازی، شش مهارت. امتیاز جمع کن و سطح بالا ببر.</p>
-      </div>
-      <div class="grid">${tiles}</div>
-      <div class="row-links">
-        <div class="link-card" onclick="go('achievements')"><b>${state.unlocked.size}/${ACHIEVEMENTS.length}</b>دستاوردها</div>
-        <div class="link-card" onclick="go('leaderboard')"><b>🏆</b>رتبه‌بندی</div>
-      </div>
-    `;
-  },
-
-  achievements(){
-    const cards = ACHIEVEMENTS.map(a=>`
-      <div class="ach ${state.unlocked.has(a.code)?'unlocked':''}">
-        <div class="ach-icon">${state.unlocked.has(a.code)?a.icon:'🔒'}</div>
-        <div class="ach-name">${a.name}</div>
-        <div class="ach-desc">${a.desc}</div>
-      </div>
-    `).join('');
-    return `
-      <div class="game-head"><div class="back-btn" onclick="go('home')">›</div><div class="game-title">دستاوردها</div><div style="width:36px"></div></div>
-      <div class="ach-grid">${cards}</div>
-    `;
-  },
-
-  leaderboard(){
-    const demo = [
-      {n:'آرمان', s:97, e:'😎'}, {n:'نگار', s:94, e:'🦊'}, {n:'سینا', s:91, e:'🐼'},
-      {n:'مهدی', s:88, e:'🦁'}, {n:'الناز', s:85, e:'🐨'},
-    ];
-    const podium = `
-      <div class="podium">
-        <div class="pod-col"><div class="pod-avatar" style="background:rgba(34,211,238,.15)">🦊</div><div class="pod-bar" style="height:64px;background:linear-gradient(180deg,#22D3EE55,#22D3EE22);color:#22D3EE">94</div><div class="pod-name">نگار</div></div>
-        <div class="pod-col"><div class="pod-avatar" style="background:rgba(251,191,36,.18)">😎</div><div class="pod-bar" style="height:86px;background:linear-gradient(180deg,#FBBF2455,#FBBF2422);color:#FBBF24">97</div><div class="pod-name">آرمان</div></div>
-        <div class="pod-col"><div class="pod-avatar" style="background:rgba(139,92,246,.15)">🐼</div><div class="pod-bar" style="height:48px;background:linear-gradient(180deg,#8B5CF655,#8B5CF622);color:#8B5CF6">91</div><div class="pod-name">سینا</div></div>
-      </div>`;
-    const rows = demo.slice(3).map((d,i)=>`
-      <div class="lb-row"><div class="lb-rank">${i+4}</div><div class="lb-name">${d.e} ${d.n}</div><div class="lb-score">${d.s}</div></div>
-    `).join('');
-    return `
-      <div class="game-head"><div class="back-btn" onclick="go('home')">›</div><div class="game-title">رتبه‌بندی</div><div style="width:36px"></div></div>
-      <div class="note-box">این لیست نمونه‌ست. بعد از وصل شدن مینی‌اپ به سرور ربات، رتبه‌بندی واقعی کاربران اینجا نمایش داده می‌شه.</div>
-      ${podium}
-      ${rows}
-    `;
-  },
-
-  result(r){
-    const stars = r.score>=90?3:r.score>=60?2:1;
-    const starEls = [1,2,3].map(i=>`<span class="star ${i<=stars?'on':''}">⭐</span>`).join('');
-    return `
-      <div class="center-stage">
-        <div class="stars">${starEls}</div>
-        <div class="score-big">${r.score}</div>
-        <div class="score-cap">امتیاز از ۱۰۰</div>
-        <div class="stat-row">
-          <div class="stat-card"><b>+${r.xp}</b><span>XP</span></div>
-          <div class="stat-card"><b>+${r.coins}</b><span>سکه</span></div>
-          <div class="stat-card"><b>${r.detail}</b><span>جزئیات</span></div>
-        </div>
-        <button class="btn btn-primary" onclick="startTest('${r.key}')">دوباره بازی کن</button>
-        <button class="btn btn-ghost" onclick="go('home')">بازگشت به منو</button>
-      </div>
-    `;
-  },
-};
-
-/* ---------- GAME FRAME HELPER ---------- */
-function gameHead(title, total, current){
-  const dots = Array.from({length:total}).map((_,i)=>{
-    const cls = i<current ? 'done' : (i===current ? 'now' : '');
-    return `<div class="dot ${cls}"></div>`;
-  }).join('');
-  return `<div class="game-head">
-    <div class="back-btn" onclick="go('home')">›</div>
-    <div class="game-title">${title}</div>
-    <div class="progress-dots">${dots}</div>
-  </div>`;
-}
-
-function finishGame(key, score, correct, total, extraDetail, durationMs){
-  state.sessionStreak++;
-  if(state.sessionStreak>=5) unlock('combo5');
-  if(state.best[key]===undefined || score>state.best[key]) state.best[key]=score;
-  if(score>=100) unlock('perfect');
-  if(state.unlocked.size===0 || !state.unlocked.has('first')) unlock('first');
-
-  const xpGain = Math.round(score/2)+10;
-  const coinGain = Math.round(score/10)+1;
-  addXp(xpGain); state.coins+=coinGain; renderHud();
-
-  // ثبت واقعی روی سرور بله (پس‌زمینه، منتظرش نمی‌مونیم تا بازی روون بمونه)
-  apiSubmit(key, score, correct, total, durationMs||0);
-
-  go('result', { key, score, xp:xpGain, coins:coinGain, detail: extraDetail || `${correct}/${total}` });
-}
-
-function startTest(key){
-  state.screen='game';
-  if(key==='memory') return startMemory();
-  if(key==='reaction') return startReaction();
-  if(key==='math') return startMCQ('math', genMath, 6);
-  if(key==='pattern') return startMCQ('pattern', genPattern, 5);
-  if(key==='attention') return startMCQ('attention', genAttention, 5);
-  if(key==='logic') return startMCQ('logic', genLogic, 5);
-}
-
-/* =================== MEMORY (Simon) =================== */
-let simon = {};
-function startMemory(){
-  simon = { seq:[], round:0, userIdx:0, playing:true };
-  nextSimonRound();
-}
-function renderSimon(){
-  const stage=document.getElementById('stage');
-  stage.innerHTML = `
-    ${gameHead('حافظه · دنباله', 8, Math.min(simon.round,8))}
-    <div class="center-stage">
-      <div class="round-badge">دور ${simon.round}</div>
-      <div class="simon-grid" id="simonGrid">
-        ${[0,1,2,3].map(i=>`<div class="pad pad-${i}" id="pad-${i}" onclick="simonTap(${i})"></div>`).join('')}
-      </div>
-      <div class="sub-text">دنباله رو تماشا کن، بعد همون ترتیب رو بزن</div>
-    </div>
-  `;
-}
-function nextSimonRound(){
-  simon.round++;
-  simon.seq.push(Math.floor(Math.random()*4));
-  simon.userIdx=0;
-  renderSimon();
-  playSimonSeq();
-}
-async function playSimonSeq(){
-  await new Promise(r=>setTimeout(r,500));
-  for(const idx of simon.seq){
-    const pad=document.getElementById('pad-'+idx);
-    if(!pad) return;
-    pad.classList.add('lit');
-    await new Promise(r=>setTimeout(r,380));
-    pad.classList.remove('lit');
-    await new Promise(r=>setTimeout(r,180));
+  /* theme */
+  function applyTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    document.getElementById("themeBtn").textContent = t === "dark" ? "🌙" : "☀️";
+    try { localStorage.setItem(TKEY, t); } catch (e) {}
   }
-}
-function simonTap(i){
-  if(!simon.playing) return;
-  const pad=document.getElementById('pad-'+i);
-  pad.classList.add('lit');
-  setTimeout(()=>pad.classList.remove('lit'),200);
-  if(simon.seq[simon.userIdx]===i){
-    simon.userIdx++;
-    if(simon.userIdx===simon.seq.length){
-      if(simon.round>=8){ endMemory(true); return; }
-      setTimeout(nextSimonRound, 700);
-    }
-  } else {
-    endMemory(false);
-  }
-}
-function endMemory(cleared){
-  simon.playing=false;
-  const rounds = cleared? simon.round : simon.round-1;
-  const score = Math.min(100, Math.round(rounds/8*100));
-  if(rounds>=6) unlock('fast'.length?'first':'first'); // no-op guard, real check below
-  finishGame('memory', score, rounds, 8, `${rounds} دور`);
-}
-
-/* =================== REACTION =================== */
-let reactState={};
-function startReaction(){
-  reactState={ phase:'idle' };
-  const stage=document.getElementById('stage');
-  stage.innerHTML = `
-    ${gameHead('سرعت واکنش', 1, 0)}
-    <div class="sub-text" style="text-align:center;margin:10px 0 16px;">وقتی صفحه سبز شد و «بزن!» رو دیدی، سریع لمس کن</div>
-    <div class="react-field wait" id="reactField" onclick="reactTap()">
-      <div class="react-msg" id="reactMsg">برای شروع لمس کن</div>
-    </div>
-  `;
-}
-function reactTap(){
-  const field=document.getElementById('reactField');
-  const msg=document.getElementById('reactMsg');
-  if(reactState.phase==='idle'){
-    reactState.phase='waiting';
-    field.className='react-field wait'; msg.textContent='صبر کن...';
-    const delay = 1200+Math.random()*2800;
-    reactState.timer=setTimeout(()=>{
-      reactState.phase='go';
-      reactState.goTime=performance.now();
-      field.className='react-field go'; msg.textContent='بزن! 🟢';
-    }, delay);
-  } else if(reactState.phase==='waiting'){
-    clearTimeout(reactState.timer);
-    reactState.phase='idle';
-    field.className='react-field early'; msg.textContent='زودتر از موعد! دوباره لمس کن';
-    setTimeout(()=>{ field.className='react-field wait'; msg.textContent='برای شروع لمس کن'; }, 1200);
-  } else if(reactState.phase==='go'){
-    const ms = Math.round(performance.now()-reactState.goTime);
-    let score, label;
-    if(ms<=300){score=100; label='فوق‌العاده';}
-    else if(ms<=600){score=80; label='عالی';}
-    else if(ms<=1000){score=60; label='خوب';}
-    else {score=40; label='کند';}
-    if(ms<=300) unlock('fast');
-    finishGame('reaction', score, 1, 1, `${ms}ms · ${label}`, ms);
-  }
-}
-
-/* =================== MCQ ENGINE (math/pattern/attention/logic) =================== */
-let mcq={};
-function startMCQ(key, generator, count){
-  mcq = { key, generator, count, idx:0, correct:0, questions: Array.from({length:count},generator) };
-  renderMCQ();
-}
-function renderMCQ(){
-  const q = mcq.questions[mcq.idx];
-  const timed = mcq.key==='math';
-  const stage=document.getElementById('stage');
-  stage.innerHTML = `
-    ${gameHead(TESTS[mcq.key].title, mcq.count, mcq.idx)}
-    <div class="center-stage">
-      ${timed ? `<div class="ring-wrap"><svg width="74" height="74">
-          <circle class="ring-bg" cx="37" cy="37" r="30"></circle>
-          <circle class="ring-fg" id="ringFg" cx="37" cy="37" r="30" stroke-dasharray="188.4" stroke-dashoffset="0"></circle>
-        </svg><div class="ring-num" id="ringNum">5</div></div>` : ''}
-      <div class="prompt-text">${q.question}</div>
-      <div class="opt-list">
-        ${q.options.map((opt,i)=>`<button class="opt-btn" onclick="answerMCQ(${i})">${opt}</button>`).join('')}
-      </div>
-    </div>
-  `;
-  if(timed) startRing();
-}
-let ringTimer=null;
-function startRing(){
-  clearInterval(ringTimer);
-  let t=5.0;
-  const fg=document.getElementById('ringFg'); const num=document.getElementById('ringNum');
-  const full=188.4;
-  ringTimer=setInterval(()=>{
-    t-=0.1;
-    if(!fg) { clearInterval(ringTimer); return; }
-    fg.setAttribute('stroke-dashoffset', (full*(1-t/5)).toFixed(1));
-    num.textContent = Math.max(0,Math.ceil(t));
-    if(t<=0){ clearInterval(ringTimer); answerMCQ(-1); }
-  },100);
-}
-function answerMCQ(choice){
-  clearInterval(ringTimer);
-  const q = mcq.questions[mcq.idx];
-  const btns = document.querySelectorAll('.opt-btn');
-  btns.forEach((b,i)=>{
-    b.onclick=null;
-    if(i===q.correct) b.classList.add('correct');
-    else if(i===choice) b.classList.add('wrong');
+  var savedTheme = "dark";
+  try { savedTheme = localStorage.getItem(TKEY) || "dark"; } catch (e) {}
+  applyTheme(savedTheme);
+  document.getElementById("themeBtn").addEventListener("click", function () {
+    applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"); hapticTap();
   });
-  if(choice===q.correct) mcq.correct++;
-  else document.getElementById('frame').classList.add('shake');
-  setTimeout(()=>{
-    document.getElementById('frame').classList.remove('shake');
-    mcq.idx++;
-    if(mcq.idx>=mcq.count){
-      const score=Math.round(mcq.correct/mcq.count*100);
-      finishGame(mcq.key, score, mcq.correct, mcq.count);
-    } else renderMCQ();
-  }, 700);
-}
+  document.getElementById("settingsBtn").addEventListener("click", function () {
+    hapticTap();
+    toast("نسخه ۱.۰ — داده‌ها روی همین دستگاه ذخیره می‌شود", "i");
+  });
 
-/* ---- question generators ---- */
-function shuffledOptions(correctVal, pool){
-  const opts=[correctVal, ...pool].map(String);
-  for(let i=opts.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]]; }
-  return { options:opts, correct:opts.indexOf(String(correctVal)) };
-}
-function genMath(){
-  const a=Math.floor(Math.random()*40)+5, b=Math.floor(Math.random()*9)+2, c=Math.floor(Math.random()*20)+3;
-  const useMul = Math.random()<0.5;
-  let q,correct;
-  if(useMul){ q=`${a} × ${b} + ${c} = ?`; correct=a*b+c; }
-  else { q=`${a} + ${b*c} - ${c} = ?`; correct=a+b*c-c; }
-  const wrongs=new Set();
-  while(wrongs.size<3){ const w=correct+(Math.floor(Math.random()*17)-8); if(w!==correct) wrongs.add(w); }
-  const {options,correct:ci}=shuffledOptions(correct,[...wrongs]);
-  return {question:q, options, correct:ci};
-}
-function genPattern(){
-  const start=Math.floor(Math.random()*4)+2, ratio=Math.random()<0.5?2:3;
-  const seq=[0,1,2,3].map(i=>start*Math.pow(ratio,i));
-  const correct=seq[3]*ratio;
-  const wrongs=new Set();
-  while(wrongs.size<3){ const w=correct+(Math.floor(Math.random()*11)-5); if(w!==correct && w>0) wrongs.add(w); }
-  const {options,correct:ci}=shuffledOptions(correct,[...wrongs]);
-  return {question:`${seq.join(' ، ')} ، ❓`, options, correct:ci};
-}
-function genAttention(){
-  const letters=['A','B','C','D'];
-  const grid=Array.from({length:12},()=>letters[Math.floor(Math.random()*4)]);
-  const target=letters[Math.floor(Math.random()*4)];
-  const count=grid.filter(l=>l===target).length;
-  const wrongs=new Set();
-  while(wrongs.size<3){ const w=count+(Math.floor(Math.random()*5)-2); if(w!==count && w>=0) wrongs.add(w); }
-  const {options,correct:ci}=shuffledOptions(count,[...wrongs]);
-  return {question:`${grid.join(' ')}\n\nچند بار «${target}» تکرار شده؟`, options, correct:ci};
-}
-const LOGIC_BANK=[
-  { q:'اگر همه پرندگان تخم‌گذار باشند و گنجشک یک پرنده باشد، کدام درست است؟', correct:'گنجشک تخم می‌گذارد', wrong:['گنجشک پستاندار است','هیچ نتیجه‌ای نمی‌توان گرفت','گنجشک پرنده نیست'] },
-  { q:'علی از رضا بزرگ‌تر است. رضا از مهدی بزرگ‌تر است. چه کسی از همه کوچک‌تر است؟', correct:'مهدی', wrong:['علی','رضا','هیچ‌کدام'] },
-  { q:'همه Aها، B هستند. هیچ Bای، C نیست. آیا ممکن است یک A، C باشد؟', correct:'خیر', wrong:['بله','نمی‌توان تعیین کرد'] },
-  { q:'اگر امروز سه‌شنبه باشد، سه روز دیگر چه روزیه؟', correct:'جمعه', wrong:['پنج‌شنبه','شنبه','چهارشنبه'] },
-  { q:'یک جعبه یا قرمزه یا آبی. جعبه سبز نیست. اگه قرمز هم نباشه، چه رنگیه؟', correct:'آبی', wrong:['قرمز','سبز','نامشخص'] },
-  { q:'همه گربه‌ها پستاندارند. برخی پستانداران پرواز می‌کنند. آیا همه گربه‌ها پرواز می‌کنند؟', correct:'خیر', wrong:['بله','بعضی‌هاشون'] },
-];
-function genLogic(){
-  const item=LOGIC_BANK[Math.floor(Math.random()*LOGIC_BANK.length)];
-  const {options,correct:ci}=shuffledOptions(item.correct,item.wrong);
-  return {question:item.q, options, correct:ci};
-}
+  /* filters */
+  document.getElementById("filters").addEventListener("click", function (e) {
+    var b = e.target.closest(".chip"); if (!b) return;
+    state.filter = b.dataset.f;
+    [].forEach.call(this.querySelectorAll(".chip"), function (c) { c.classList.toggle("on", c === b); });
+    hapticTap(); renderReminders();
+  });
 
-/* ---------- INIT ---------- */
-renderHud();
-go('home');
-apiInit();
+  /* form */
+  var F = {
+    title: document.getElementById("title"), desc: document.getElementById("desc"),
+    date: document.getElementById("date"), time: document.getElementById("time"),
+    repeat: document.getElementById("repeat"), priority: document.getElementById("priority")
+  };
+  function clearErrors() { ["eTitle", "eDate", "eTime", "ePast"].forEach(function (i) { document.getElementById(i).classList.remove("on"); }); }
+
+  function openForm(r) {
+    clearErrors();
+    state.editingId = r ? r.id : null;
+    document.getElementById("sheetTitle").textContent = r ? "ویرایش یادآوری" : "یادآوری جدید";
+    var now = new Date();
+    F.title.value = r ? r.title : "";
+    F.desc.value = r ? r.description : "";
+    F.date.value = r ? r.date : ymd(now);
+    F.time.value = r ? r.time : hm(new Date(Date.now() + 3600000));
+    F.repeat.value = r ? r.repeat : "none";
+    F.priority.value = r ? r.priority : "normal";
+    openSheet(sheet);
+  }
+  document.getElementById("fab").addEventListener("click", function () { hapticTap(); openForm(null); });
+  document.getElementById("cancelBtn").addEventListener("click", closeSheets);
+
+  document.getElementById("form").addEventListener("submit", function (e) {
+    e.preventDefault(); clearErrors();
+    var title = F.title.value.trim(), ok = true;
+    if (title.length < 2) { document.getElementById("eTitle").classList.add("on"); ok = false; }
+    if (!F.date.value || isNaN(new Date(F.date.value).getTime())) { document.getElementById("eDate").classList.add("on"); ok = false; }
+    if (!/^\d{2}:\d{2}$/.test(F.time.value)) { document.getElementById("eTime").classList.add("on"); ok = false; }
+    if (ok) {
+      var t = new Date(F.date.value + "T" + F.time.value).getTime();
+      if (isNaN(t)) { document.getElementById("eDate").classList.add("on"); ok = false; }
+      else if (!state.editingId && t < Date.now() - 60000) { document.getElementById("ePast").classList.add("on"); ok = false; }
+    }
+    if (!ok) { hapticError(); toast("لطفاً فیلدها را بررسی کنید", "e"); return; }
+
+    var payload = {
+      title: title, description: F.desc.value.trim(), date: F.date.value,
+      time: F.time.value, repeat: F.repeat.value, priority: F.priority.value
+    };
+    if (state.editingId) { updateReminder(state.editingId, payload); toast("ویرایش ذخیره شد", "s"); }
+    else { createReminder(payload); toast("یادآوری ثبت شد", "s"); }
+    hapticSuccess(); closeSheets(); renderReminders(); updateStats();
+  });
+
+  /* card actions */
+  listEl.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-act]"); if (!b) return;
+    var id = b.dataset.id;
+    if (b.dataset.act === "done") completeReminder(id);
+    else if (b.dataset.act === "edit") { hapticTap(); openForm(findR(id)); }
+    else if (b.dataset.act === "snooze") { state.snoozeId = id; hapticTap(); openSheet(snoozeSheet); }
+    else if (b.dataset.act === "del") {
+      state.deleteId = id;
+      var r = findR(id);
+      document.getElementById("confirmText").textContent = "«" + (r ? r.title : "") + "» برای همیشه حذف می‌شود. مطمئنی؟";
+      hapticWarning(); openSheet(confirmSheet);
+    }
+  });
+
+  snoozeSheet.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-sn]"); if (!b) return;
+    snoozeReminder(state.snoozeId, b.dataset.sn); state.snoozeId = null; closeSheets();
+  });
+  document.getElementById("snCancel").addEventListener("click", closeSheets);
+  document.getElementById("cfNo").addEventListener("click", closeSheets);
+  document.getElementById("cfYes").addEventListener("click", function () {
+    if (state.deleteId) { deleteReminder(state.deleteId); state.deleteId = null; renderReminders(); updateStats(); toast("حذف شد", "s"); hapticSuccess(); }
+    closeSheets();
+  });
+
+  /* greeting */
+  function greet() {
+    var name = "دوست عزیز";
+    try { if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.first_name) name = tg.initDataUnsafe.user.first_name; } catch (e) {}
+    var h = new Date().getHours(), part = h < 12 ? "صبح بخیر" : h < 18 ? "ظهر بخیر" : "شب بخیر";
+    document.getElementById("hello").textContent = part + "، " + name + " 👋";
+  }
+
+  /* boot + live refresh for due items */
+  loadData(); greet(); renderReminders(); updateStats();
+  setInterval(function () { renderReminders(); updateStats(); }, 30000);
+
+  window.Yadavar = {
+    state: state, createReminder: createReminder, updateReminder: updateReminder,
+    deleteReminder: deleteReminder, completeReminder: completeReminder, snoozeReminder: snoozeReminder,
+    renderReminders: renderReminders, updateStats: updateStats, saveData: saveData, loadData: loadData,
+    sendToTelegram: sendToTelegram, closeMiniApp: closeMiniApp,
+    hapticSuccess: hapticSuccess, hapticWarning: hapticWarning, hapticError: hapticError
+  };
+})();
 </script>
 </body>
 </html>
